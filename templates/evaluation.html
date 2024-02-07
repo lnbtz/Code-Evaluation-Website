@@ -1,0 +1,14 @@
+<!-- templates/index.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Code Evaluation</h1>
+<form id="eval-form">
+    <textarea placeholder="your code goes here..." required type=text name="code" rows="20" cols="100"></textarea>
+    <input placeholder="file type" required type=text name="file_type">
+    <button hx-post="/eval" hx-trigger="click" hx-target="#suggestions">evaluate code</button>
+</form>
+
+<div id="suggestions"></div>
+{% endblock %}
+
