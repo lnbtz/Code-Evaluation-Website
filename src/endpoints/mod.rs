@@ -1,17 +1,20 @@
 pub mod response;
 
+use core::str;
+
+use crate::model::linter::parse_code;
+use crate::model::rules::LineResult;
 use askama::Template;
 use axum::response::IntoResponse;
 use response::HtmlTemplate;
-
 #[derive(Template)]
 #[template(path = "evaluation.html")]
 pub struct EvaluationTemplate;
 
-#[derive(Template, Debug)]
+#[derive(Template)]
 #[template(path = "suggestions.html")]
 struct SuggestionsTemplate {
-    suggestions: Vec<String>,
+    suggestions: Vec<LineResult>,
 }
 
 pub async fn home_handler() -> impl IntoResponse {
@@ -21,12 +24,11 @@ pub async fn home_handler() -> impl IntoResponse {
 
 pub async fn eval(form: axum::Form<Code>) -> impl IntoResponse {
     let code = form.code.clone();
-    println!("Code:\n {}", code);
     let file_type = form.file_type.clone();
-    println!("File Type:\n {}", file_type);
-    let suggestions: Vec<String> = vec![code, file_type];
-    let template = SuggestionsTemplate { suggestions };
-    println!("template:\n {:?}", template);
+    let linter_result = parse_code(code, file_type);
+    let template = SuggestionsTemplate {
+        suggestions: linter_result,
+    };
     HtmlTemplate(template)
 }
 

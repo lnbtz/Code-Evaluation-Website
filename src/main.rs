@@ -1,4 +1,5 @@
 mod endpoints;
+mod model;
 
 use axum::{
     routing::{get, post},

@@ -1,5 +1,24 @@
 <div id="suggestions" style="color: brown;">
+<!-- TODO make it return a table with suggestions that map to the linter_result -->
+<!-- the table has severity, line, column, classification, description -->
+    <h3>Suggestions</h3>
+    <table>
+        <tr>
+            <th>Severity</th>
+            <th>Line</th>
+            <th>Column</th>
+            <th>Classification</th>
+            <th>Description</th>
+        </tr>
         {% for suggestion in suggestions %}
-             <div>{{ suggestion }}</div>
+        <tr>
+            <td>{{ suggestion.severity }}</td>
+            <td>{{ suggestion.line }}</td>
+            <td>{{ suggestion.column }}</td>
+            <td>{{ suggestion.classification }}</td>
+            <td>{{ suggestion.description }}</td>
+        </tr>
         {% endfor %}
+    </table>
+
 </div>
