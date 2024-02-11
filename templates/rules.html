@@ -1,0 +1,7 @@
+<div id="rules">
+    <fieldset>
+    {% for rule in checkboxes %}
+    <input type="checkbox" name="rule" value="{{ rule.value }}" id="{{ rule.value }}" checked><label for="{{ rule.value }}">{{ rule.name }}</label>
+    {% endfor %}
+    </fieldset>
+</div>

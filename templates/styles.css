@@ -1,0 +1,96 @@
+h1 {
+  background-color: #333;
+  color: #fff;
+  padding: 20px;
+  text-align: center;
+  font-size: 24px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+form#eval-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+}
+
+form#eval-form textarea {
+  width: 80%;
+  height: 200px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  resize: none;
+}
+
+form#eval-form .dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+form#eval-form .dropdown select {
+  width: 200px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background: url("dropdown-arrow.png") no-repeat right center;
+  background-size: 20px;
+}
+
+form#eval-form .dropdown select::-ms-expand {
+  display: none;
+}
+
+form#eval-form .dropdown select option {
+  padding: 10px;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+}
+
+form#eval-form .dropdown::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 5px solid #ccc;
+}
+
+form#eval-form .dropdown:hover::after {
+  border-top-color: #999;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+table th {
+  font-weight: bold;
+}
+
+table td {
+  font-weight: normal;
+}
+
+table th,
+table td {
+  border: 1px solid #ccc;
+  padding: 8px;
+  text-align: left;
+}
+
