@@ -14,12 +14,6 @@ impl Rule for Dry {
     }
     fn apply(&self, input: &str) -> Option<std::vec::Vec<LineResult>> {
         // TODO implement dry css rule here
-        Some(vec![LineResult {
-            severity: crate::model::rules::Severity::Warning,
-            line: 1,
-            column: 1,
-            classification: self.get_name().to_string(),
-            description: self.get_description().to_string(),
-        }])
+        todo!()
     }
 }

@@ -9,7 +9,7 @@ use endpoints::{evaluation, home, styles};
 use tracing::info;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
-use crate::endpoints::rules;
+use crate::endpoints::{image, rules};
 
 #[tokio::main]
 async fn main() {
@@ -26,7 +26,8 @@ async fn main() {
         .route("/", get(home))
         .route("/eval", post(evaluation))
         .route("/rules", get(rules))
-        .route("/styles.css", get(styles));
+        .route("/styles.css", get(styles))
+        .route("/image.png", get(image));
 
     // run it
     let listener = tokio::net::TcpListener::bind("127.0.0.1:3000")

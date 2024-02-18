@@ -1,7 +1,6 @@
 use self::css::{dry::Dry, minify::Minify};
 
 pub mod css;
-
 pub mod html;
 pub mod js;
 
@@ -62,12 +61,13 @@ pub fn load_css_rules(rules_to_load: Vec<String>) -> Vec<Box<dyn Rule>> {
 
 pub fn load_html_rules(rules_to_load: Vec<String>) -> Vec<Box<dyn Rule>> {
     if rules_to_load.is_empty() {
-        return vec![];
+        return vec![Box::new(html::loading::Loading) as Box<dyn Rule>];
     }
     // TODO think of smart way to statically create rules and then load them when needed
     rules_to_load
         .iter()
         .map(|rule| match rule.as_str() {
+            "lazy-loading" => Box::new(html::loading::Loading) as Box<dyn Rule>,
             _ => panic!("Unknown rule: {}", rule),
         })
         .collect()

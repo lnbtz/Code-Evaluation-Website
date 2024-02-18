@@ -3,13 +3,13 @@
 // each line is parsed and the result is stored in the LinterResult
 use crate::model::rules::*;
 
-pub fn parse_code(code: String, file_type: String, rules_to_apply: Vec<String>) -> Vec<LineResult> {
+pub fn parse_code(code: &str, file_type: String, rules_to_apply: Vec<String>) -> Vec<LineResult> {
     let mut line_results: Vec<LineResult> = Vec::new();
     // use rules based on file_type
     let rules: Vec<Box<dyn Rule>> = load_rules(file_type, rules_to_apply);
 
     for rule in rules {
-        if let Some(result) = rule.apply(&code) {
+        if let Some(result) = rule.apply(code) {
             line_results.extend(result);
         }
     }

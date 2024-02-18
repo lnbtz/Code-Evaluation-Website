@@ -1,9 +1,8 @@
-use axum::extract::Query;
-
 use crate::model::linter::parse_code;
 use crate::model::rules::{load_rules, LineResult, Rule};
 use askama::{Html, Template};
 use askama_axum::Response;
+use axum::extract::Query;
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
 use axum_extra::extract::Form;
@@ -16,6 +15,7 @@ pub struct EvaluationTemplate;
 #[template(path = "suggestions.html")]
 struct SuggestionsTemplate {
     suggestions: Vec<LineResult>,
+    code: String,
 }
 
 #[derive(Template)]
@@ -33,9 +33,10 @@ pub async fn evaluation(form: Form<Input>) -> impl IntoResponse {
     let code = form.code.clone();
     let file_type = form.file_type.clone();
     let rules_to_apply = form.rules.clone();
-    let linter_result = parse_code(code, file_type, rules_to_apply);
+    let linter_result = parse_code(&code, file_type, rules_to_apply);
     let template = SuggestionsTemplate {
         suggestions: linter_result,
+        code,
     };
     HtmlTemplate(template)
 }
@@ -81,6 +82,16 @@ pub async fn styles() -> impl IntoResponse {
         .status(StatusCode::OK)
         .header("Content-Type", "text/css")
         .body(include_str!("../../templates/styles.css").to_owned())
+        .unwrap()
+}
+
+pub async fn image() -> impl IntoResponse {
+    Response::builder()
+        .status(StatusCode::OK)
+        .header("Content-Type", "image/png")
+        .body(axum::body::Body::from(
+            include_bytes!("../../media/image.png").to_vec(),
+        ))
         .unwrap()
 }
 pub struct HtmlTemplate<T>(pub T);
