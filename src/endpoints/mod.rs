@@ -15,7 +15,7 @@ pub struct EvaluationTemplate;
 #[template(path = "suggestions.html")]
 struct SuggestionsTemplate {
     suggestions: Vec<LineResult>,
-    code: String,
+    code: Vec<String>,
 }
 
 #[derive(Template)]
@@ -36,7 +36,7 @@ pub async fn evaluation(form: Form<Input>) -> impl IntoResponse {
     let linter_result = parse_code(&code, file_type, rules_to_apply);
     let template = SuggestionsTemplate {
         suggestions: linter_result,
-        code,
+        code: code.lines().map(|line| line.to_string()).collect(),
     };
     HtmlTemplate(template)
 }

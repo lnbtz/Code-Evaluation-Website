@@ -20,9 +20,8 @@
     </table>
     <div class="box">
         <pre>
-            <code class="language-rust line-numbers">
-                {{ code }}
-            </code>
+            {% for line in code %}
+            <code class="highlight">  {{line}}</code>{% endfor %}
         <pre>
     </div>
     
