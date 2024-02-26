@@ -15,7 +15,7 @@ pub struct EvaluationTemplate;
 #[template(path = "suggestions.html")]
 struct SuggestionsTemplate {
     suggestions: Vec<LineResult>,
-    code: Vec<String>,
+    code: Vec<(String, String)>,
 }
 
 #[derive(Template)]
@@ -34,9 +34,24 @@ pub async fn evaluation(form: Form<Input>) -> impl IntoResponse {
     let file_type = form.file_type.clone();
     let rules_to_apply = form.rules.clone();
     let linter_result = parse_code(&code, file_type, rules_to_apply);
+    let mirror_code = code
+        .lines()
+        .enumerate()
+        .map(|(line_nr, line)| {
+            let line_nr = line_nr + 1;
+            if linter_result
+                .iter()
+                .any(|result| result.line == line_nr as i32)
+            {
+                ("highlight".to_string(), line.to_string())
+            } else {
+                ("normal".to_string(), line.to_string())
+            }
+        })
+        .collect();
     let template = SuggestionsTemplate {
         suggestions: linter_result,
-        code: code.lines().map(|line| line.to_string()).collect(),
+        code: mirror_code,
     };
     HtmlTemplate(template)
 }

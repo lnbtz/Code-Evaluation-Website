@@ -95,6 +95,7 @@ table td {
 }
 pre{
   counter-reset: line;
+  background-color: #f6f6f6;
 }
 code{
   counter-increment: line;

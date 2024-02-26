@@ -21,7 +21,7 @@
     <div class="box">
         <pre>
             {% for line in code %}
-            <code class="highlight">  {{line}}</code>{% endfor %}
+            <code class="{{line.0}}">  {{line.1}}</code>{% endfor %}
         <pre>
     </div>
     
