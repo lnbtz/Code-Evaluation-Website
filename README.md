@@ -7,23 +7,20 @@ This repository contains the source code for a code evaluation website. The webs
 - Code submission: Users can submit their code for evaluation.
 - Automated evaluation: The submitted code is automatically evaluated based on predefined criteria.
 - Feedback: Users receive detailed feedback on their code, including suggestions for improvement.
-- User authentication: Users can create accounts and log in to access additional features.
-- Admin panel: Administrators have access to an admin panel for managing users and evaluations.
 
 ## Installation
 To run the code evaluation website locally, follow these steps:
 
 1. Clone the repository: `git clone https://github.com/your-username/Code-Evaluation-Website.git`
-2. Install dependencies: `npm install`
-3. Set up the database: [instructions here]
-4. Configure environment variables: [instructions here]
-5. Start the server: `npm start`
+2. Install dependencies: `cargo build`
+3. Start the server: `cargo run`
 
 ## Usage
-1. Access the website at [URL].
-2. Sign up for an account or log in if you already have one.
-3. Submit your code for evaluation.
-4. Receive feedback and improve your coding skills!
+1. Access the website at [http://localhost:3000].
+2. Submit your code for evaluation.
+3. select file format
+4. mark checkboxes for rules that you want applied to your code
+5. Receive feedback and improve your code efficiency in terms of energy usage!
 
 ## Contributing
 Contributions are welcome! If you'd like to contribute to this project, please follow these guidelines:
@@ -37,5 +34,5 @@ Contributions are welcome! If you'd like to contribute to this project, please f
 This project is licensed under the [MIT License](LICENSE).
 
 ## Contact
-If you have any questions or suggestions, feel free to contact us at [email address].
+If you have any questions or suggestions, feel free to contact us at leonbeitz@hotmail.de.
 
