@@ -78,6 +78,7 @@ pub fn load_js_rules(rules_to_load: Vec<String>) -> Vec<Box<dyn Rule>> {
         return vec![
             Box::new(js::minify::Minify) as Box<dyn Rule>,
             Box::new(js::methods::Methods) as Box<dyn Rule>,
+            Box::new(js::duplicates::Duplicates) as Box<dyn Rule>,
         ];
     }
     // TODO think of smart way to statically create rules and then load them when needed
@@ -86,6 +87,7 @@ pub fn load_js_rules(rules_to_load: Vec<String>) -> Vec<Box<dyn Rule>> {
         .map(|rule| match rule.as_str() {
             "js-minify" => Box::new(js::minify::Minify) as Box<dyn Rule>,
             "js-method-calls" => Box::new(js::methods::Methods) as Box<dyn Rule>,
+            "js-duplicates" => Box::new(js::duplicates::Duplicates) as Box<dyn Rule>,
             _ => panic!("Unknown rule: {}", rule),
         })
         .collect()

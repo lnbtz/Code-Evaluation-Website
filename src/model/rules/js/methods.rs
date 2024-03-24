@@ -1,5 +1,5 @@
 use crate::model::rules::LineResult;
-use axum::http::method;
+
 use oxc::allocator::Allocator;
 use oxc::ast::{AstKind, Visit};
 use oxc::parser::Parser;
@@ -23,21 +23,18 @@ impl Rule for Methods {
         let source_text = input;
         let source_type = SourceType::from_path("javscript.js").unwrap();
         let ret = Parser::new(&allocator, source_text, source_type).parse();
-
-        for error in ret.errors {
-            let error = error.with_source_code(source_text.to_string().clone());
-            println!("{error:?}");
-        }
-
         let program = ret.program;
 
-        let mut ast_pass = ASTPass::default();
+        let mut ast_pass = MethodFinder {
+            function_name_spans: vec![],
+            methods: vec![String::from("height")],
+        };
         ast_pass.visit_program(&program);
         for (function_name, start, _end) in ast_pass.function_name_spans {
             let (line, column) = line_column(input, start);
             let classification = "bad method".to_string();
             let description = format!(
-                "Consider not using the {}() method and use checkout suggestions for alternatives",
+                "Consider not using the {}() method and checkout suggestions for alternatives",
                 function_name
             );
             let line_result = LineResult {
@@ -54,11 +51,12 @@ impl Rule for Methods {
 }
 
 #[derive(Debug, Default)]
-struct ASTPass {
+struct MethodFinder {
     function_name_spans: Vec<(String, u32, u32)>,
+    methods: Vec<String>,
 }
 
-impl<'a> Visit<'a> for ASTPass {
+impl<'a> Visit<'a> for MethodFinder {
     fn enter_node(&mut self, kind: AstKind<'a>) {
         if let AstKind::CallExpression(call_expression) = kind {
             let method_name = if call_expression.callee.is_identifier_reference() {
@@ -77,7 +75,7 @@ impl<'a> Visit<'a> for ASTPass {
                     .unwrap()
                     .to_string()
             };
-            if method_name == "height" {
+            if self.methods.contains(&method_name) {
                 self.function_name_spans.push((
                     method_name,
                     call_expression.callee.span().start,
@@ -102,5 +100,5 @@ fn line_column(input: &str, start: u32) -> (i32, i32) {
             column += 1;
         }
     }
-    (line as i32, column as i32)
+    (line, column)
 }
