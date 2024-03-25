@@ -90,21 +90,16 @@ impl<'a> Visit<'a> for DuplicatesPatternFinder {
                         // match arrow function expression
                         ArrowFunctionExpression(arrow_function_expression) => {
                             // handle arrow function expression
-                            handle_arrow_function_expression(arrow_function_expression);
+                            handle_arrow_function_expression(self, arrow_function_expression);
                         }
                         // match function expression
                         FunctionExpression(function_expression) => {
                             // handle function expression
-                            handle_function_expression(function_expression);
+                            handle_function_expression(self, function_expression);
                         }
                         _ => {}
                     }
                 };
-                self.function_name_spans.push((
-                    String::from("filter"),
-                    call_expression.callee.span().start,
-                    call_expression.callee.span().end,
-                ));
             }
         }
     }
@@ -125,6 +120,7 @@ fn get_function_target_identifier_name<'a>(
 }
 
 fn handle_arrow_function_expression(
+    duplicates_patter_finder: &mut DuplicatesPatternFinder,
     arrow_function_expression: &oxc::allocator::Box<'_, oxc::ast::ast::ArrowFunctionExpression<'_>>,
 ) {
     if arrow_function_expression.params.items.len() >= 2 {
@@ -133,13 +129,14 @@ fn handle_arrow_function_expression(
         let function_body = &arrow_function_expression.body;
         if let ExpressionStatement(binary_expression) = &function_body.statements[0] {
             if let BinaryExpression(binary_expression) = &binary_expression.expression {
-                handle_binary_expression(binary_expression);
+                handle_binary_expression(duplicates_patter_finder, binary_expression);
             }
         }
     };
 }
 
 fn handle_function_expression(
+    duplicates_patter_finder: &mut DuplicatesPatternFinder,
     function_expression: &oxc::allocator::Box<'_, oxc::ast::ast::Function<'_>>,
 ) {
     if function_expression.params.items.len() >= 2 && function_expression.body.is_some() {
@@ -149,7 +146,7 @@ fn handle_function_expression(
         if let Some(body) = &function_expression.body {
             if let ReturnStatement(return_statement) = &body.statements[0] {
                 if let Some(BinaryExpression(binary_expression)) = &return_statement.argument {
-                    handle_binary_expression(binary_expression);
+                    handle_binary_expression(duplicates_patter_finder, binary_expression);
                 }
             }
         }
@@ -157,6 +154,7 @@ fn handle_function_expression(
 }
 
 fn handle_binary_expression(
+    duplicates_patter_finder: &mut DuplicatesPatternFinder,
     binary_expression: &oxc::allocator::Box<'_, oxc::ast::ast::BinaryExpression<'_>>,
 ) {
     if (binary_expression.operator == Equality || binary_expression.operator == StrictEquality)
@@ -166,14 +164,15 @@ fn handle_binary_expression(
                 && binary_expression.left.is_identifier_reference()))
     {
         if let CallExpression(call_expression) = &binary_expression.right {
-            handle_call_expression(call_expression);
+            handle_call_expression(duplicates_patter_finder, call_expression);
         } else if let CallExpression(call_expression) = &binary_expression.left {
-            handle_call_expression(call_expression);
+            handle_call_expression(duplicates_patter_finder, call_expression);
         }
     }
 }
 
 fn handle_call_expression(
+    duplicates_patter_finder: &mut DuplicatesPatternFinder,
     call_expression: &oxc::allocator::Box<'_, oxc::ast::ast::CallExpression<'_>>,
 ) {
     if let Some(callee) = call_expression.callee.get_member_expr() {
@@ -181,7 +180,11 @@ fn handle_call_expression(
             if static_property_name == "indexOf" {
                 // handle indexOf method call
                 // TODO add logic to match the indexOf method call
-                println!("pattern found");
+                duplicates_patter_finder.function_name_spans.push((
+                    String::from("pattern found"),
+                    call_expression.callee.span().start,
+                    call_expression.callee.span().end,
+                ));
             }
         }
     }
@@ -222,27 +225,27 @@ mod tests {
     use oxc::parser::Parser;
     use oxc::span::SourceType;
 
-    #[test]
-    fn test_visit_program_arrow_function_three_params() {
-        let allocator = Allocator::default();
-        let source_text = "let uniqueArray = array.filter((value, index, self) => self.indexOf(value) === index);";
-        let source_type = SourceType::from_path("javscript.js").unwrap();
-        let ret = Parser::new(&allocator, source_text, source_type).parse();
-        let program = ret.program;
+    /*
+    let uniqueArray = array.filter((item, index) => array.indexOf(item) === index);
+    let uniqueArray1 = array.filter(function(item, pos) { return array.indexOf(item) === pos });
+    let uniqueArray2 = array.filter(function(item, pos, self) { return self.indexOf(item) === pos });
+    let uniqueArray3 = array.filter((item, index, self) => self.indexOf(item) === index);
+    let uniqueArray4 = array.filter((item, index) => index === array.indexOf(item));
+    let uniqueArray5 = array.filter(function(item, pos) { return pos === array.indexOf(item) });
+    let uniqueArray6 = array.filter(function(item, pos, self) { return pos === self.indexOf(item) });
+    let uniqueArray7 = array.filter((item, index, self) => index === self.indexOf(item));
+    let uniqueArray8 = array.filter((item, index) => array.indexOf(item) == index);
+    let uniqueArray9 = array.filter(function(item, pos) { return array.indexOf(item) == pos });
+    let uniqueArray10 = array.filter(function(item, pos, self) { return self.indexOf(item) == pos });
+    let uniqueArray11 = array.filter((item, index, self) => self.indexOf(item) == index);
+    let uniqueArray12 = array.filter((item, index) => index == array.indexOf(item));
+    let uniqueArray13 = array.filter(function(item, pos) { return pos == array.indexOf(item) });
+    let uniqueArray14 = array.filter(function(item, pos, self) { return pos == self.indexOf(item) });
+    let uniqueArray15 = array.filter((item, index, self) => index == self.indexOf(item));
+     */
 
-        let mut ast_pass = DuplicatesPatternFinder {
-            function_name_spans: vec![],
-            array_identifier: String::from(""),
-            item: String::from(""),
-            pos: String::from(""),
-        };
-        ast_pass.visit_program(&program);
-        assert_eq!(ast_pass.function_name_spans.len(), 1);
-        assert_eq!(ast_pass.function_name_spans[0].0, "filter");
-    }
-
     #[test]
-    fn test_visit_program_arrow_function_two_params() {
+    fn test_visit_program_arrow_two_params_strict_equality_regular() {
         let allocator = Allocator::default();
         let source_text =
             "let uniqueArray = array.filter((item, index) => array.indexOf(item) === index);";
@@ -258,30 +261,11 @@ mod tests {
         };
         ast_pass.visit_program(&program);
         assert_eq!(ast_pass.function_name_spans.len(), 1);
-        assert_eq!(ast_pass.function_name_spans[0].0, "filter");
+        assert_eq!(ast_pass.function_name_spans[0].0, "pattern found");
     }
 
     #[test]
-    fn test_visit_program_function_expression_three_params() {
-        let allocator = Allocator::default();
-        let source_text = "let uniqueArray = array.filter(function(item, pos, self) { return self.indexOf(item) == pos });";
-        let source_type = SourceType::from_path("javscript.js").unwrap();
-        let ret = Parser::new(&allocator, source_text, source_type).parse();
-        let program = ret.program;
-
-        let mut ast_pass = DuplicatesPatternFinder {
-            function_name_spans: vec![],
-            array_identifier: String::from(""),
-            item: String::from(""),
-            pos: String::from(""),
-        };
-        ast_pass.visit_program(&program);
-        assert_eq!(ast_pass.function_name_spans.len(), 1);
-        assert_eq!(ast_pass.function_name_spans[0].0, "filter");
-    }
-
-    #[test]
-    fn test_visit_program_function_expression_two_params() {
+    fn test_visit_program_function_two_params_strict_equality_regular() {
         let allocator = Allocator::default();
         let source_text =
             "let uniqueArray1 = array.filter(function(item, pos) { return array.indexOf(item) === pos });";
@@ -297,6 +281,286 @@ mod tests {
         };
         ast_pass.visit_program(&program);
         assert_eq!(ast_pass.function_name_spans.len(), 1);
-        assert_eq!(ast_pass.function_name_spans[0].0, "filter");
+        assert_eq!(ast_pass.function_name_spans[0].0, "pattern found");
+    }
+
+    #[test]
+    fn test_visit_program_function_three_params_strict_equality_regular() {
+        let allocator = Allocator::default();
+        let source_text =
+            "let uniqueArray2 = array.filter(function(item, pos, self) { return self.indexOf(item) === pos });";
+        let source_type = SourceType::from_path("javscript.js").unwrap();
+        let ret = Parser::new(&allocator, source_text, source_type).parse();
+        let program = ret.program;
+
+        let mut ast_pass = DuplicatesPatternFinder {
+            function_name_spans: vec![],
+            array_identifier: String::from(""),
+            item: String::from(""),
+            pos: String::from(""),
+        };
+        ast_pass.visit_program(&program);
+        assert_eq!(ast_pass.function_name_spans.len(), 1);
+        assert_eq!(ast_pass.function_name_spans[0].0, "pattern found");
+    }
+
+    #[test]
+    fn test_visit_program_arrow_three_params_strict_equality_regular() {
+        let allocator = Allocator::default();
+        let source_text =
+            "let uniqueArray3 = array.filter((item, index, self) => self.indexOf(item) === index);";
+        let source_type = SourceType::from_path("javscript.js").unwrap();
+        let ret = Parser::new(&allocator, source_text, source_type).parse();
+        let program = ret.program;
+
+        let mut ast_pass = DuplicatesPatternFinder {
+            function_name_spans: vec![],
+            array_identifier: String::from(""),
+            item: String::from(""),
+            pos: String::from(""),
+        };
+        ast_pass.visit_program(&program);
+        assert_eq!(ast_pass.function_name_spans.len(), 1);
+        assert_eq!(ast_pass.function_name_spans[0].0, "pattern found");
+    }
+
+    #[test]
+    fn test_visit_program_arrow_two_params_strict_equality_reverse() {
+        let allocator = Allocator::default();
+        let source_text =
+            "let uniqueArray4 = array.filter((item, index) => index === array.indexOf(item));";
+        let source_type = SourceType::from_path("javscript.js").unwrap();
+        let ret = Parser::new(&allocator, source_text, source_type).parse();
+        let program = ret.program;
+
+        let mut ast_pass = DuplicatesPatternFinder {
+            function_name_spans: vec![],
+            array_identifier: String::from(""),
+            item: String::from(""),
+            pos: String::from(""),
+        };
+        ast_pass.visit_program(&program);
+        assert_eq!(ast_pass.function_name_spans.len(), 1);
+        assert_eq!(ast_pass.function_name_spans[0].0, "pattern found");
+    }
+
+    #[test]
+    fn test_visit_program_function_two_params_strict_equality_reverse() {
+        let allocator = Allocator::default();
+        let source_text =
+            "let uniqueArray5 = array.filter(function(item, pos) { return pos === array.indexOf(item) });";
+        let source_type = SourceType::from_path("javscript.js").unwrap();
+        let ret = Parser::new(&allocator, source_text, source_type).parse();
+        let program = ret.program;
+
+        let mut ast_pass = DuplicatesPatternFinder {
+            function_name_spans: vec![],
+            array_identifier: String::from(""),
+            item: String::from(""),
+            pos: String::from(""),
+        };
+        ast_pass.visit_program(&program);
+        assert_eq!(ast_pass.function_name_spans.len(), 1);
+        assert_eq!(ast_pass.function_name_spans[0].0, "pattern found");
+    }
+
+    #[test]
+    fn test_visit_program_function_three_params_strict_equality_reverse() {
+        let allocator = Allocator::default();
+        let source_text =
+            "let uniqueArray6 = array.filter(function(item, pos, self) { return pos === self.indexOf(item) });";
+        let source_type = SourceType::from_path("javscript.js").unwrap();
+        let ret = Parser::new(&allocator, source_text, source_type).parse();
+        let program = ret.program;
+
+        let mut ast_pass = DuplicatesPatternFinder {
+            function_name_spans: vec![],
+            array_identifier: String::from(""),
+            item: String::from(""),
+            pos: String::from(""),
+        };
+        ast_pass.visit_program(&program);
+        assert_eq!(ast_pass.function_name_spans.len(), 1);
+        assert_eq!(ast_pass.function_name_spans[0].0, "pattern found");
+    }
+
+    #[test]
+    fn test_visit_program_arrow_three_params_strict_equality_reverse() {
+        let allocator = Allocator::default();
+        let source_text =
+            "let uniqueArray7 = array.filter((item, index, self) => index === self.indexOf(item));";
+        let source_type = SourceType::from_path("javscript.js").unwrap();
+        let ret = Parser::new(&allocator, source_text, source_type).parse();
+        let program = ret.program;
+
+        let mut ast_pass = DuplicatesPatternFinder {
+            function_name_spans: vec![],
+            array_identifier: String::from(""),
+            item: String::from(""),
+            pos: String::from(""),
+        };
+        ast_pass.visit_program(&program);
+        assert_eq!(ast_pass.function_name_spans.len(), 1);
+        assert_eq!(ast_pass.function_name_spans[0].0, "pattern found");
+    }
+
+    #[test]
+    fn test_visit_program_arrow_two_params_equality_regular() {
+        let allocator = Allocator::default();
+        let source_text =
+            "let uniqueArray8 = array.filter((item, index) => array.indexOf(item) == index);";
+        let source_type = SourceType::from_path("javscript.js").unwrap();
+        let ret = Parser::new(&allocator, source_text, source_type).parse();
+        let program = ret.program;
+
+        let mut ast_pass = DuplicatesPatternFinder {
+            function_name_spans: vec![],
+            array_identifier: String::from(""),
+            item: String::from(""),
+            pos: String::from(""),
+        };
+        ast_pass.visit_program(&program);
+        assert_eq!(ast_pass.function_name_spans.len(), 1);
+        assert_eq!(ast_pass.function_name_spans[0].0, "pattern found");
+    }
+
+    #[test]
+    fn test_visit_program_function_two_params_equality_regular() {
+        let allocator = Allocator::default();
+        let source_text =
+            "let uniqueArray9 = array.filter(function(item, pos) { return array.indexOf(item) == pos });";
+        let source_type = SourceType::from_path("javscript.js").unwrap();
+        let ret = Parser::new(&allocator, source_text, source_type).parse();
+        let program = ret.program;
+
+        let mut ast_pass = DuplicatesPatternFinder {
+            function_name_spans: vec![],
+            array_identifier: String::from(""),
+            item: String::from(""),
+            pos: String::from(""),
+        };
+        ast_pass.visit_program(&program);
+        assert_eq!(ast_pass.function_name_spans.len(), 1);
+        assert_eq!(ast_pass.function_name_spans[0].0, "pattern found");
+    }
+
+    #[test]
+    fn test_visit_program_function_three_params_equality_regular() {
+        let allocator = Allocator::default();
+        let source_text =
+            "let uniqueArray10 = array.filter(function(item, pos, self) { return self.indexOf(item) == pos });";
+        let source_type = SourceType::from_path("javscript.js").unwrap();
+        let ret = Parser::new(&allocator, source_text, source_type).parse();
+        let program = ret.program;
+
+        let mut ast_pass = DuplicatesPatternFinder {
+            function_name_spans: vec![],
+            array_identifier: String::from(""),
+            item: String::from(""),
+            pos: String::from(""),
+        };
+        ast_pass.visit_program(&program);
+        assert_eq!(ast_pass.function_name_spans.len(), 1);
+        assert_eq!(ast_pass.function_name_spans[0].0, "pattern found");
+    }
+
+    #[test]
+    fn test_visit_program_arrow_three_params_equality_regular() {
+        let allocator = Allocator::default();
+        let source_text =
+            "let uniqueArray11 = array.filter((item, index, self) => self.indexOf(item) == index);";
+        let source_type = SourceType::from_path("javscript.js").unwrap();
+        let ret = Parser::new(&allocator, source_text, source_type).parse();
+        let program = ret.program;
+
+        let mut ast_pass = DuplicatesPatternFinder {
+            function_name_spans: vec![],
+            array_identifier: String::from(""),
+            item: String::from(""),
+            pos: String::from(""),
+        };
+        ast_pass.visit_program(&program);
+        assert_eq!(ast_pass.function_name_spans.len(), 1);
+        assert_eq!(ast_pass.function_name_spans[0].0, "pattern found");
+    }
+
+    #[test]
+    fn test_visit_program_arrow_two_params_equality_reverse() {
+        let allocator = Allocator::default();
+        let source_text =
+            "let uniqueArray12 = array.filter((item, index) => index == array.indexOf(item));";
+        let source_type = SourceType::from_path("javscript.js").unwrap();
+        let ret = Parser::new(&allocator, source_text, source_type).parse();
+        let program = ret.program;
+
+        let mut ast_pass = DuplicatesPatternFinder {
+            function_name_spans: vec![],
+            array_identifier: String::from(""),
+            item: String::from(""),
+            pos: String::from(""),
+        };
+        ast_pass.visit_program(&program);
+        assert_eq!(ast_pass.function_name_spans.len(), 1);
+        assert_eq!(ast_pass.function_name_spans[0].0, "pattern found");
+    }
+
+    #[test]
+    fn test_visit_program_function_two_params_equality_reverse() {
+        let allocator = Allocator::default();
+        let source_text =
+            "let uniqueArray13 = array.filter(function(item, pos) { return pos == array.indexOf(item) });";
+        let source_type = SourceType::from_path("javscript.js").unwrap();
+        let ret = Parser::new(&allocator, source_text, source_type).parse();
+        let program = ret.program;
+
+        let mut ast_pass = DuplicatesPatternFinder {
+            function_name_spans: vec![],
+            array_identifier: String::from(""),
+            item: String::from(""),
+            pos: String::from(""),
+        };
+        ast_pass.visit_program(&program);
+        assert_eq!(ast_pass.function_name_spans.len(), 1);
+        assert_eq!(ast_pass.function_name_spans[0].0, "pattern found");
+    }
+
+    #[test]
+    fn test_visit_program_function_three_params_equality_reverse() {
+        let allocator = Allocator::default();
+        let source_text =
+            "let uniqueArray14 = array.filter(function(item, pos, self) { return pos == self.indexOf(item) });";
+        let source_type = SourceType::from_path("javscript.js").unwrap();
+        let ret = Parser::new(&allocator, source_text, source_type).parse();
+        let program = ret.program;
+
+        let mut ast_pass = DuplicatesPatternFinder {
+            function_name_spans: vec![],
+            array_identifier: String::from(""),
+            item: String::from(""),
+            pos: String::from(""),
+        };
+        ast_pass.visit_program(&program);
+        assert_eq!(ast_pass.function_name_spans.len(), 1);
+        assert_eq!(ast_pass.function_name_spans[0].0, "pattern found");
+    }
+
+    #[test]
+    fn test_visit_program_arrow_three_params_equality_reverse() {
+        let allocator = Allocator::default();
+        let source_text =
+            "let uniqueArray15 = array.filter((item, index, self) => index == self.indexOf(item));";
+        let source_type = SourceType::from_path("javscript.js").unwrap();
+        let ret = Parser::new(&allocator, source_text, source_type).parse();
+        let program = ret.program;
+
+        let mut ast_pass = DuplicatesPatternFinder {
+            function_name_spans: vec![],
+            array_identifier: String::from(""),
+            item: String::from(""),
+            pos: String::from(""),
+        };
+        ast_pass.visit_program(&program);
+        assert_eq!(ast_pass.function_name_spans.len(), 1);
+        assert_eq!(ast_pass.function_name_spans[0].0, "pattern found");
     }
 }
