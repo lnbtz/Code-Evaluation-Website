@@ -1,16 +1,20 @@
 use crate::model::rules::LineResult;
 
 use oxc::allocator::Allocator;
+
 use oxc::ast::ast::Argument::Expression;
 use oxc::ast::ast::Expression::ArrowFunctionExpression;
 use oxc::ast::ast::Expression::BinaryExpression;
 use oxc::ast::ast::Expression::CallExpression;
 use oxc::ast::ast::Expression::FunctionExpression;
+
 use oxc::ast::ast::Statement::ExpressionStatement;
+use oxc::ast::ast::Statement::ReturnStatement;
 use oxc::ast::{AstKind, Visit};
 use oxc::parser::Parser;
 use oxc::span::{GetSpan, SourceType};
 use oxc::syntax::operator::BinaryOperator::Equality;
+use oxc::syntax::operator::BinaryOperator::StrictEquality;
 
 use super::Rule;
 
@@ -21,7 +25,7 @@ impl Rule for Duplicates {
         "JS-Duplicates"
     }
     fn get_description(&self) -> &str {
-        // TODO add link to minify js
+        // TODO add proper description
         "consider replacing this pattern with the with [...new Set()] pattern to improve performance and save energy"
     }
     fn apply(&self, input: &str) -> Option<std::vec::Vec<LineResult>> {
@@ -34,9 +38,12 @@ impl Rule for Duplicates {
 
         let mut ast_pass = DuplicatesPatternFinder {
             function_name_spans: vec![],
-            methods: vec![String::from("filter")],
+            array_identifier: String::from(""),
+            item: String::from(""),
+            pos: String::from(""),
         };
         ast_pass.visit_program(&program);
+
         for (function_name, start, _end) in ast_pass.function_name_spans {
             let (line, column) = line_column(input, start);
             let classification = "bad method".to_string();
@@ -60,7 +67,9 @@ impl Rule for Duplicates {
 #[derive(Debug, Default)]
 struct DuplicatesPatternFinder {
     function_name_spans: Vec<(String, u32, u32)>,
-    methods: Vec<String>,
+    array_identifier: String,
+    item: String,
+    pos: String,
 }
 
 impl<'a> Visit<'a> for DuplicatesPatternFinder {
@@ -73,6 +82,8 @@ impl<'a> Visit<'a> for DuplicatesPatternFinder {
         if let AstKind::CallExpression(call_expression) = kind {
             // match method call 'filter'
             if is_filter_method(call_expression) {
+                let array_identifier = get_function_target_identifier_name(call_expression);
+
                 // match 'filter' call arguments and check for expression
                 if let Expression(function_expression) = &call_expression.arguments[0] {
                     match &function_expression.get_inner_expression() {
@@ -99,43 +110,65 @@ impl<'a> Visit<'a> for DuplicatesPatternFinder {
     }
 }
 
+fn get_function_target_identifier_name<'a>(
+    call_expression: &'a oxc::ast::ast::CallExpression<'a>,
+) -> &'a oxc::span::Atom {
+    &call_expression
+        .callee
+        .get_inner_expression()
+        .get_member_expr()
+        .unwrap()
+        .object()
+        .get_identifier_reference()
+        .unwrap()
+        .name
+}
+
 fn handle_arrow_function_expression(
     arrow_function_expression: &oxc::allocator::Box<'_, oxc::ast::ast::ArrowFunctionExpression<'_>>,
 ) {
-    dbg!(arrow_function_expression);
+    if arrow_function_expression.params.items.len() >= 2 {
+        // get all the parameters of the arrow function and set them to the item and pos variables
+        // dbg!(&arrow_function_expression.params.items);
+        let function_body = &arrow_function_expression.body;
+        if let ExpressionStatement(binary_expression) = &function_body.statements[0] {
+            if let BinaryExpression(binary_expression) = &binary_expression.expression {
+                handle_binary_expression(binary_expression);
+            }
+        }
+    };
 }
 
 fn handle_function_expression(
     function_expression: &oxc::allocator::Box<'_, oxc::ast::ast::Function<'_>>,
 ) {
     if function_expression.params.items.len() >= 2 && function_expression.body.is_some() {
-        // TODO handle unwrap()
-        let body = function_expression.body.as_ref().unwrap();
-        if let ExpressionStatement(expression_statement) = &body.statements[0] {
-            if expression_statement.expression.is_binaryish() {
-                handle_binary_expression(expression_statement);
+        // get all the parameters of the function and set them to the item and pos variables
+        // dbg!(&function_expression.params.items);
+
+        if let Some(body) = &function_expression.body {
+            if let ReturnStatement(return_statement) = &body.statements[0] {
+                if let Some(BinaryExpression(binary_expression)) = &return_statement.argument {
+                    handle_binary_expression(binary_expression);
+                }
             }
         }
     };
 }
 
 fn handle_binary_expression(
-    expression_statement: &oxc::allocator::Box<'_, oxc::ast::ast::ExpressionStatement<'_>>,
+    binary_expression: &oxc::allocator::Box<'_, oxc::ast::ast::BinaryExpression<'_>>,
 ) {
-    if let BinaryExpression(binary_expression) =
-        expression_statement.expression.get_inner_expression()
+    if (binary_expression.operator == Equality || binary_expression.operator == StrictEquality)
+        && ((binary_expression.right.is_identifier_reference()
+            && binary_expression.left.is_call_expression())
+            || (binary_expression.right.is_call_expression()
+                && binary_expression.left.is_identifier_reference()))
     {
-        if binary_expression.operator == Equality
-            && ((binary_expression.right.is_identifier_reference()
-                && binary_expression.left.is_call_expression())
-                || (binary_expression.right.is_call_expression()
-                    && binary_expression.left.is_identifier_reference()))
-        {
-            if let CallExpression(call_expression) = &binary_expression.right {
-                handle_call_expression(call_expression);
-            } else if let CallExpression(call_expression) = &binary_expression.left {
-                handle_call_expression(call_expression);
-            }
+        if let CallExpression(call_expression) = &binary_expression.right {
+            handle_call_expression(call_expression);
+        } else if let CallExpression(call_expression) = &binary_expression.left {
+            handle_call_expression(call_expression);
         }
     }
 }
@@ -143,38 +176,25 @@ fn handle_binary_expression(
 fn handle_call_expression(
     call_expression: &oxc::allocator::Box<'_, oxc::ast::ast::CallExpression<'_>>,
 ) {
-    // TODO handle unwrap()
-    if call_expression
-        .callee
-        .get_member_expr()
-        .unwrap()
-        .static_property_name()
-        .unwrap()
-        == "indexOf"
-    {
-        println!(
-            "{}",
-            call_expression
-                .callee
-                .get_member_expr()
-                .unwrap()
-                .static_property_name()
-                .unwrap()
-        );
+    if let Some(callee) = call_expression.callee.get_member_expr() {
+        if let Some(static_property_name) = callee.static_property_name() {
+            if static_property_name == "indexOf" {
+                // handle indexOf method call
+                // TODO add logic to match the indexOf method call
+                println!("pattern found");
+            }
+        }
     }
 }
 
 fn is_filter_method(call_expression: &oxc::ast::ast::CallExpression<'_>) -> bool {
-    // TODO handle unwrap()
-    call_expression
-        .callee
-        .get_member_expr()
-        .unwrap()
-        .static_property_name()
-        .unwrap()
-        == "filter"
+    if let Some(callee) = call_expression.callee.get_member_expr() {
+        if let Some(static_property_name) = callee.static_property_name() {
+            return static_property_name == "filter";
+        }
+    }
+    false
 }
-
 fn line_column(input: &str, start: u32) -> (i32, i32) {
     let mut line = 1;
     let mut column = 0;
@@ -203,24 +223,7 @@ mod tests {
     use oxc::span::SourceType;
 
     #[test]
-    fn test_visit_program() {
-        let allocator = Allocator::default();
-        let source_text = "uniqueArray = a.filter(function(item, pos) { a.indexOf(item) == pos })";
-        let source_type = SourceType::from_path("javscript.js").unwrap();
-        let ret = Parser::new(&allocator, source_text, source_type).parse();
-        let program = ret.program;
-
-        let mut ast_pass = DuplicatesPatternFinder {
-            function_name_spans: vec![],
-            methods: vec![String::from("filter")],
-        };
-        ast_pass.visit_program(&program);
-        assert_eq!(ast_pass.function_name_spans.len(), 1);
-        assert_eq!(ast_pass.function_name_spans[0].0, "filter");
-    }
-
-    #[test]
-    fn test_visit_program1() {
+    fn test_visit_program_arrow_function_three_params() {
         let allocator = Allocator::default();
         let source_text = "let uniqueArray = array.filter((value, index, self) => self.indexOf(value) === index);";
         let source_type = SourceType::from_path("javscript.js").unwrap();
@@ -229,7 +232,68 @@ mod tests {
 
         let mut ast_pass = DuplicatesPatternFinder {
             function_name_spans: vec![],
-            methods: vec![String::from("filter")],
+            array_identifier: String::from(""),
+            item: String::from(""),
+            pos: String::from(""),
+        };
+        ast_pass.visit_program(&program);
+        assert_eq!(ast_pass.function_name_spans.len(), 1);
+        assert_eq!(ast_pass.function_name_spans[0].0, "filter");
+    }
+
+    #[test]
+    fn test_visit_program_arrow_function_two_params() {
+        let allocator = Allocator::default();
+        let source_text =
+            "let uniqueArray = array.filter((item, index) => array.indexOf(item) === index);";
+        let source_type = SourceType::from_path("javscript.js").unwrap();
+        let ret = Parser::new(&allocator, source_text, source_type).parse();
+        let program = ret.program;
+
+        let mut ast_pass = DuplicatesPatternFinder {
+            function_name_spans: vec![],
+            array_identifier: String::from(""),
+            item: String::from(""),
+            pos: String::from(""),
+        };
+        ast_pass.visit_program(&program);
+        assert_eq!(ast_pass.function_name_spans.len(), 1);
+        assert_eq!(ast_pass.function_name_spans[0].0, "filter");
+    }
+
+    #[test]
+    fn test_visit_program_function_expression_three_params() {
+        let allocator = Allocator::default();
+        let source_text = "let uniqueArray = array.filter(function(item, pos, self) { return self.indexOf(item) == pos });";
+        let source_type = SourceType::from_path("javscript.js").unwrap();
+        let ret = Parser::new(&allocator, source_text, source_type).parse();
+        let program = ret.program;
+
+        let mut ast_pass = DuplicatesPatternFinder {
+            function_name_spans: vec![],
+            array_identifier: String::from(""),
+            item: String::from(""),
+            pos: String::from(""),
+        };
+        ast_pass.visit_program(&program);
+        assert_eq!(ast_pass.function_name_spans.len(), 1);
+        assert_eq!(ast_pass.function_name_spans[0].0, "filter");
+    }
+
+    #[test]
+    fn test_visit_program_function_expression_two_params() {
+        let allocator = Allocator::default();
+        let source_text =
+            "let uniqueArray1 = array.filter(function(item, pos) { return array.indexOf(item) === pos });";
+        let source_type = SourceType::from_path("javscript.js").unwrap();
+        let ret = Parser::new(&allocator, source_text, source_type).parse();
+        let program = ret.program;
+
+        let mut ast_pass = DuplicatesPatternFinder {
+            function_name_spans: vec![],
+            array_identifier: String::from(""),
+            item: String::from(""),
+            pos: String::from(""),
         };
         ast_pass.visit_program(&program);
         assert_eq!(ast_pass.function_name_spans.len(), 1);
