@@ -45,13 +45,10 @@ impl Rule for Duplicates {
         };
         array_duplicates_pattern_finder.visit_program(&program);
 
-        for (function_name, start, _end) in array_duplicates_pattern_finder.function_name_spans {
+        for (_function_name, start, _end) in array_duplicates_pattern_finder.function_name_spans {
             let (line, column) = line_column(input, start);
             let classification = "bad method".to_string();
-            let description = format!(
-                "Consider not using the {}() method and checkout suggestions for alternatives",
-                function_name
-            );
+            let description = self.get_description().to_string();
             let line_result = LineResult {
                 severity: crate::model::rules::Severity::Warning,
                 line,

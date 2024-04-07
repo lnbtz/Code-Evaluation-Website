@@ -1,5 +1,6 @@
 use crate::model::linter::parse_code;
 use crate::model::rules::{load_rules, LineResult, Rule};
+#[allow(unused_imports)]
 use askama::{Html, Template};
 use askama_axum::Response;
 use axum::extract::Query;

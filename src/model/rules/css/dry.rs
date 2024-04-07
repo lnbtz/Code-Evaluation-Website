@@ -14,6 +14,7 @@ impl Rule for Dry {
     }
     fn apply(&self, input: &str) -> Option<std::vec::Vec<LineResult>> {
         // TODO implement dry css rule here
+        println!("Applying CSS-DRY rule {}", input);
         todo!()
     }
 }
