@@ -97,6 +97,7 @@ fn load_java_rules(rules_to_load: Vec<String>) -> Vec<Box<dyn Rule>> {
     rules_to_load
         .iter()
         .map(|rule| match rule.as_str() {
+            "some-rule" => panic!("Not implemented yet"),
             _ => panic!("Unknown rule: {}", rule),
         })
         .collect()

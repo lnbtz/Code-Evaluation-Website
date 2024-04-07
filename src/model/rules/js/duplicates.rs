@@ -292,10 +292,6 @@ fn is_valid_expression_statement<'a>(
 // endregion: helpers
 impl<'a> Visit<'a> for ArrayDuplicatesPatternFinder {
     fn enter_node(&mut self, kind: AstKind<'a>) {
-        // TODO match identifier references in the method calls.
-        // get the identifier of the filter method call and the indexOf method call and also the arguments of the filter method call
-        // then match them all so the pattern matches
-
         // match method call
         if let AstKind::CallExpression(call_expression) = kind {
             // match method call 'filter'
