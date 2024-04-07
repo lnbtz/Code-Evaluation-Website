@@ -21,7 +21,7 @@ async fn main() {
         .with(tracing_subscriber::fmt::layer())
         .init();
 
-    // build our application with a route
+    // build app with routes
     let app = Router::new()
         .route("/", get(home))
         .route("/eval", post(evaluation))

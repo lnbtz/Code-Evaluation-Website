@@ -1,0 +1,421 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 3.3 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated by
+% biber as required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+
+\refsection{0}
+  \datalist[entry]{apa/apasortcite//global/global/global}
+    \entry{schlosser}{book}{}{}
+      \name{author}{1}{}{%
+        {{un=0,uniquepart=base,hash=c64104fe58d23e1038efb975b3805f44}{%
+           family={Schlosser},
+           familyi={S\bibinitperiod},
+           given={Joachim},
+           giveni={J\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{location}{1}{%
+        {Frechen}%
+      }
+      \list{publisher}{1}{%
+        {mitp}%
+      }
+      \strng{namehash}{c64104fe58d23e1038efb975b3805f44}
+      \strng{fullhash}{c64104fe58d23e1038efb975b3805f44}
+      \strng{fullhashraw}{c64104fe58d23e1038efb975b3805f44}
+      \strng{bibnamehash}{c64104fe58d23e1038efb975b3805f44}
+      \strng{authorbibnamehash}{c64104fe58d23e1038efb975b3805f44}
+      \strng{authornamehash}{c64104fe58d23e1038efb975b3805f44}
+      \strng{authorfullhash}{c64104fe58d23e1038efb975b3805f44}
+      \strng{authorfullhashraw}{c64104fe58d23e1038efb975b3805f44}
+      \field{sortinit}{S}
+      \field{sortinithash}{b164b07b29984b41daf1e85279fbc5ab}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \true{uniqueprimaryauthor}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{edition}{7}
+      \field{subtitle}{Leitfaden für Einsteiger}
+      \field{title}{Wissenschaftliche Arbeiten schreiben mit LaTeX}
+      \field{year}{2021}
+    \endentry
+    \entry{voss}{book}{}{}
+      \name{author}{1}{}{%
+        {{un=0,uniquepart=base,hash=e081108643ae4b78a904ec3a607d3d71}{%
+           family={Voß},
+           familyi={V\bibinitperiod},
+           given={Herbert},
+           giveni={H\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{location}{1}{%
+        {Berlin}%
+      }
+      \list{publisher}{1}{%
+        {Lehmanns Media}%
+      }
+      \strng{namehash}{e081108643ae4b78a904ec3a607d3d71}
+      \strng{fullhash}{e081108643ae4b78a904ec3a607d3d71}
+      \strng{fullhashraw}{e081108643ae4b78a904ec3a607d3d71}
+      \strng{bibnamehash}{e081108643ae4b78a904ec3a607d3d71}
+      \strng{authorbibnamehash}{e081108643ae4b78a904ec3a607d3d71}
+      \strng{authornamehash}{e081108643ae4b78a904ec3a607d3d71}
+      \strng{authorfullhash}{e081108643ae4b78a904ec3a607d3d71}
+      \strng{authorfullhashraw}{e081108643ae4b78a904ec3a607d3d71}
+      \field{sortinit}{V}
+      \field{sortinithash}{afb52128e5b4dc4b843768c0113d673b}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \true{uniqueprimaryauthor}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{edition}{2}
+      \field{subtitle}{unter Verwendung von LuaTeX, KOMA-Script und Biber/BibLaTeX}
+      \field{title}{Die wissenschaftliche Arbeit mit LaTeX}
+      \field{year}{2021}
+    \endentry
+    \entry{weitz}{book}{}{}
+      \name{author}{1}{}{%
+        {{un=0,uniquepart=base,hash=8818ea2425849f321bfc8f5c7711099b}{%
+           family={Weitz},
+           familyi={W\bibinitperiod},
+           given={Edmund},
+           giveni={E\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{location}{1}{%
+        {Berlin \& Heidelberg}%
+      }
+      \list{publisher}{1}{%
+        {Springer}%
+      }
+      \strng{namehash}{8818ea2425849f321bfc8f5c7711099b}
+      \strng{fullhash}{8818ea2425849f321bfc8f5c7711099b}
+      \strng{fullhashraw}{8818ea2425849f321bfc8f5c7711099b}
+      \strng{bibnamehash}{8818ea2425849f321bfc8f5c7711099b}
+      \strng{authorbibnamehash}{8818ea2425849f321bfc8f5c7711099b}
+      \strng{authornamehash}{8818ea2425849f321bfc8f5c7711099b}
+      \strng{authorfullhash}{8818ea2425849f321bfc8f5c7711099b}
+      \strng{authorfullhashraw}{8818ea2425849f321bfc8f5c7711099b}
+      \field{extraname}{1}
+      \field{sortinit}{W}
+      \field{sortinithash}{4315d78024d0cea9b57a0c6f0e35ed0d}
+      \field{extradate}{1}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \true{uniqueprimaryauthor}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{subtitle}{Eine Entdeckungsreise in die Mathematik}
+      \field{title}{Pi und die Primzahlen}
+      \field{year}{2021}
+    \endentry
+    \entry{weitz2}{article}{}{}
+      \name{author}{1}{}{%
+        {{un=0,uniquepart=base,hash=8818ea2425849f321bfc8f5c7711099b}{%
+           family={Weitz},
+           familyi={W\bibinitperiod},
+           given={Edmund},
+           giveni={E\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{8818ea2425849f321bfc8f5c7711099b}
+      \strng{fullhash}{8818ea2425849f321bfc8f5c7711099b}
+      \strng{fullhashraw}{8818ea2425849f321bfc8f5c7711099b}
+      \strng{bibnamehash}{8818ea2425849f321bfc8f5c7711099b}
+      \strng{authorbibnamehash}{8818ea2425849f321bfc8f5c7711099b}
+      \strng{authornamehash}{8818ea2425849f321bfc8f5c7711099b}
+      \strng{authorfullhash}{8818ea2425849f321bfc8f5c7711099b}
+      \strng{authorfullhashraw}{8818ea2425849f321bfc8f5c7711099b}
+      \field{extraname}{2}
+      \field{sortinit}{W}
+      \field{sortinithash}{4315d78024d0cea9b57a0c6f0e35ed0d}
+      \field{extradate}{2}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \true{uniqueprimaryauthor}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{day}{1}
+      \field{issn}{1432-1815}
+      \field{journaltitle}{Math. Semesterberichte}
+      \field{month}{10}
+      \field{number}{2}
+      \field{title}{Hausdorff's forgotten proof that almost all numbers are normal}
+      \field{volume}{68}
+      \field{year}{2021}
+      \field{dateera}{ce}
+      \field{pages}{273\bibrangedash 282}
+      \range{pages}{10}
+      \verb{doi}
+      \verb 10.1007/s00591-021-00303-w
+      \endverb
+      \verb{urlraw}
+      \verb https://doi.org/10.1007/s00591-021-00303-w
+      \endverb
+      \verb{url}
+      \verb https://doi.org/10.1007/s00591-021-00303-w
+      \endverb
+    \endentry
+    \entry{zappa}{online}{}{}
+      \name{author}{1}{}{%
+        {{un=0,uniquepart=base,hash=d9fb627f97e1fe6a71fbfe00f1166e76}{%
+           family={Zappa},
+           familyi={Z\bibinitperiod},
+           given={Frank},
+           giveni={F\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{location}{1}{%
+        {Hollywood}%
+      }
+      \list{publisher}{1}{%
+        {DiscReet}%
+      }
+      \strng{namehash}{d9fb627f97e1fe6a71fbfe00f1166e76}
+      \strng{fullhash}{d9fb627f97e1fe6a71fbfe00f1166e76}
+      \strng{fullhashraw}{d9fb627f97e1fe6a71fbfe00f1166e76}
+      \strng{bibnamehash}{d9fb627f97e1fe6a71fbfe00f1166e76}
+      \strng{authorbibnamehash}{d9fb627f97e1fe6a71fbfe00f1166e76}
+      \strng{authornamehash}{d9fb627f97e1fe6a71fbfe00f1166e76}
+      \strng{authorfullhash}{d9fb627f97e1fe6a71fbfe00f1166e76}
+      \strng{authorfullhashraw}{d9fb627f97e1fe6a71fbfe00f1166e76}
+      \field{sortinit}{Z}
+      \field{sortinithash}{96892c0b0a36bb8557c40c49813d48b3}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \true{uniqueprimaryauthor}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{subtitle}{Stink-Foot}
+      \field{title}{Apostrophe (')}
+      \field{urlday}{11}
+      \field{urlmonth}{3}
+      \field{urlyear}{2022}
+      \field{year}{1974}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb http://www.donlope.net/fz/lyrics/Apostrophe_(').html
+      \endverb
+      \verb{url}
+      \verb http://www.donlope.net/fz/lyrics/Apostrophe_(').html
+      \endverb
+    \endentry
+  \enddatalist
+  \datalist[entry]{apa/global//global/global/global}
+    \entry{schlosser}{book}{}{}
+      \name{author}{1}{}{%
+        {{un=0,uniquepart=base,hash=c64104fe58d23e1038efb975b3805f44}{%
+           family={Schlosser},
+           familyi={S\bibinitperiod},
+           given={Joachim},
+           giveni={J\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{location}{1}{%
+        {Frechen}%
+      }
+      \list{publisher}{1}{%
+        {mitp}%
+      }
+      \strng{namehash}{c64104fe58d23e1038efb975b3805f44}
+      \strng{fullhash}{c64104fe58d23e1038efb975b3805f44}
+      \strng{fullhashraw}{c64104fe58d23e1038efb975b3805f44}
+      \strng{bibnamehash}{c64104fe58d23e1038efb975b3805f44}
+      \strng{authorbibnamehash}{c64104fe58d23e1038efb975b3805f44}
+      \strng{authornamehash}{c64104fe58d23e1038efb975b3805f44}
+      \strng{authorfullhash}{c64104fe58d23e1038efb975b3805f44}
+      \strng{authorfullhashraw}{c64104fe58d23e1038efb975b3805f44}
+      \field{sortinit}{S}
+      \field{sortinithash}{b164b07b29984b41daf1e85279fbc5ab}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \true{uniqueprimaryauthor}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{edition}{7}
+      \field{subtitle}{Leitfaden für Einsteiger}
+      \field{title}{Wissenschaftliche Arbeiten schreiben mit LaTeX}
+      \field{year}{2021}
+    \endentry
+    \entry{voss}{book}{}{}
+      \name{author}{1}{}{%
+        {{un=0,uniquepart=base,hash=e081108643ae4b78a904ec3a607d3d71}{%
+           family={Voß},
+           familyi={V\bibinitperiod},
+           given={Herbert},
+           giveni={H\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{location}{1}{%
+        {Berlin}%
+      }
+      \list{publisher}{1}{%
+        {Lehmanns Media}%
+      }
+      \strng{namehash}{e081108643ae4b78a904ec3a607d3d71}
+      \strng{fullhash}{e081108643ae4b78a904ec3a607d3d71}
+      \strng{fullhashraw}{e081108643ae4b78a904ec3a607d3d71}
+      \strng{bibnamehash}{e081108643ae4b78a904ec3a607d3d71}
+      \strng{authorbibnamehash}{e081108643ae4b78a904ec3a607d3d71}
+      \strng{authornamehash}{e081108643ae4b78a904ec3a607d3d71}
+      \strng{authorfullhash}{e081108643ae4b78a904ec3a607d3d71}
+      \strng{authorfullhashraw}{e081108643ae4b78a904ec3a607d3d71}
+      \field{sortinit}{V}
+      \field{sortinithash}{afb52128e5b4dc4b843768c0113d673b}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \true{uniqueprimaryauthor}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{edition}{2}
+      \field{subtitle}{unter Verwendung von LuaTeX, KOMA-Script und Biber/BibLaTeX}
+      \field{title}{Die wissenschaftliche Arbeit mit LaTeX}
+      \field{year}{2021}
+    \endentry
+    \entry{weitz}{book}{}{}
+      \name{author}{1}{}{%
+        {{un=0,uniquepart=base,hash=8818ea2425849f321bfc8f5c7711099b}{%
+           family={Weitz},
+           familyi={W\bibinitperiod},
+           given={Edmund},
+           giveni={E\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{location}{1}{%
+        {Berlin \& Heidelberg}%
+      }
+      \list{publisher}{1}{%
+        {Springer}%
+      }
+      \strng{namehash}{8818ea2425849f321bfc8f5c7711099b}
+      \strng{fullhash}{8818ea2425849f321bfc8f5c7711099b}
+      \strng{fullhashraw}{8818ea2425849f321bfc8f5c7711099b}
+      \strng{bibnamehash}{8818ea2425849f321bfc8f5c7711099b}
+      \strng{authorbibnamehash}{8818ea2425849f321bfc8f5c7711099b}
+      \strng{authornamehash}{8818ea2425849f321bfc8f5c7711099b}
+      \strng{authorfullhash}{8818ea2425849f321bfc8f5c7711099b}
+      \strng{authorfullhashraw}{8818ea2425849f321bfc8f5c7711099b}
+      \field{extraname}{1}
+      \field{sortinit}{W}
+      \field{sortinithash}{4315d78024d0cea9b57a0c6f0e35ed0d}
+      \field{extradate}{1}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \true{uniqueprimaryauthor}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{subtitle}{Eine Entdeckungsreise in die Mathematik}
+      \field{title}{Pi und die Primzahlen}
+      \field{year}{2021}
+    \endentry
+    \entry{weitz2}{article}{}{}
+      \name{author}{1}{}{%
+        {{un=0,uniquepart=base,hash=8818ea2425849f321bfc8f5c7711099b}{%
+           family={Weitz},
+           familyi={W\bibinitperiod},
+           given={Edmund},
+           giveni={E\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{8818ea2425849f321bfc8f5c7711099b}
+      \strng{fullhash}{8818ea2425849f321bfc8f5c7711099b}
+      \strng{fullhashraw}{8818ea2425849f321bfc8f5c7711099b}
+      \strng{bibnamehash}{8818ea2425849f321bfc8f5c7711099b}
+      \strng{authorbibnamehash}{8818ea2425849f321bfc8f5c7711099b}
+      \strng{authornamehash}{8818ea2425849f321bfc8f5c7711099b}
+      \strng{authorfullhash}{8818ea2425849f321bfc8f5c7711099b}
+      \strng{authorfullhashraw}{8818ea2425849f321bfc8f5c7711099b}
+      \field{extraname}{2}
+      \field{sortinit}{W}
+      \field{sortinithash}{4315d78024d0cea9b57a0c6f0e35ed0d}
+      \field{extradate}{2}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \true{uniqueprimaryauthor}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{day}{1}
+      \field{issn}{1432-1815}
+      \field{journaltitle}{Math. Semesterberichte}
+      \field{month}{10}
+      \field{number}{2}
+      \field{title}{Hausdorff's forgotten proof that almost all numbers are normal}
+      \field{volume}{68}
+      \field{year}{2021}
+      \field{dateera}{ce}
+      \field{pages}{273\bibrangedash 282}
+      \range{pages}{10}
+      \verb{doi}
+      \verb 10.1007/s00591-021-00303-w
+      \endverb
+      \verb{urlraw}
+      \verb https://doi.org/10.1007/s00591-021-00303-w
+      \endverb
+      \verb{url}
+      \verb https://doi.org/10.1007/s00591-021-00303-w
+      \endverb
+    \endentry
+    \entry{zappa}{online}{}{}
+      \name{author}{1}{}{%
+        {{un=0,uniquepart=base,hash=d9fb627f97e1fe6a71fbfe00f1166e76}{%
+           family={Zappa},
+           familyi={Z\bibinitperiod},
+           given={Frank},
+           giveni={F\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{location}{1}{%
+        {Hollywood}%
+      }
+      \list{publisher}{1}{%
+        {DiscReet}%
+      }
+      \strng{namehash}{d9fb627f97e1fe6a71fbfe00f1166e76}
+      \strng{fullhash}{d9fb627f97e1fe6a71fbfe00f1166e76}
+      \strng{fullhashraw}{d9fb627f97e1fe6a71fbfe00f1166e76}
+      \strng{bibnamehash}{d9fb627f97e1fe6a71fbfe00f1166e76}
+      \strng{authorbibnamehash}{d9fb627f97e1fe6a71fbfe00f1166e76}
+      \strng{authornamehash}{d9fb627f97e1fe6a71fbfe00f1166e76}
+      \strng{authorfullhash}{d9fb627f97e1fe6a71fbfe00f1166e76}
+      \strng{authorfullhashraw}{d9fb627f97e1fe6a71fbfe00f1166e76}
+      \field{sortinit}{Z}
+      \field{sortinithash}{96892c0b0a36bb8557c40c49813d48b3}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \true{uniqueprimaryauthor}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{subtitle}{Stink-Foot}
+      \field{title}{Apostrophe (')}
+      \field{urlday}{11}
+      \field{urlmonth}{3}
+      \field{urlyear}{2022}
+      \field{year}{1974}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb http://www.donlope.net/fz/lyrics/Apostrophe_(').html
+      \endverb
+      \verb{url}
+      \verb http://www.donlope.net/fz/lyrics/Apostrophe_(').html
+      \endverb
+    \endentry
+  \enddatalist
+\endrefsection
+\endinput
+

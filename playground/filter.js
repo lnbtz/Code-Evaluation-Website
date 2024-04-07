@@ -17,7 +17,37 @@ let uniqueArray12 = array.filter((item, index) => index == array.indexOf(item));
 let uniqueArray13 = array.filter(function(item, pos) { return pos == array.indexOf(item) });
 let uniqueArray14 = array.filter(function(item, pos, self) { return pos == self.indexOf(item) });
 let uniqueArray15 = array.filter((item, index, self) => index == self.indexOf(item));
-
+let uniqueArray16 = array.filter((item, index) => {
+    return array.indexOf(item) === index;
+});
+let uniqueArray17 = array.filter((item, index) => {
+    return index === array.indexOf(item);
+});
+let uniqueArray18 = array.filter((item, index) => {
+    return array.indexOf(item) == index;
+});
+let uniqueArray19 = array.filter((item, index) => {
+    return index == array.indexOf(item);
+});
+let uniqueArray20 = array.filter((item, index, self) => {
+    return self.indexOf(item) === index;
+});
+let uniqueArray21 = array.filter((item, index, self) => {
+    return index === self.indexOf(item);
+});
+let uniqueArray22 = array.filter((item, index, self) => {
+    return self.indexOf(item) == index;
+});
+let uniqueArray23 = array.filter((item, index, self) => {
+    return index == self.indexOf(item);
+});
+let uniqueArray24 = array.filter(() => {});
+let uniqueArray100 = array.filter(function(item, index, self) {} );
+let uniqueArray110 = array.filter(function() { });
+let uniqueArray230 = array.filter((item, index, self) => {
+    return index == self.indexOf(self);
+});
+let uniqueArray150 = array.filter((item, index, self) => self.indexOf() === index);
 console.log(uniqueArray.length === 10);
 console.log(uniqueArray1.length === 10);
 console.log(uniqueArray2.length === 10);
@@ -34,3 +64,13 @@ console.log(uniqueArray12.length == 10);
 console.log(uniqueArray13.length == 10);
 console.log(uniqueArray14.length == 10);
 console.log(uniqueArray15.length == 10);
+console.log(uniqueArray16.length === 10);
+console.log(uniqueArray17.length === 10);
+console.log(uniqueArray18.length === 10);
+console.log(uniqueArray19.length === 10);
+console.log(uniqueArray20.length === 10);
+console.log(uniqueArray21.length === 10);
+console.log(uniqueArray22.length === 10);
+console.log(uniqueArray23.length === 10);
+console.log(uniqueArray24.length === 10);
+console.log(uniqueArray150.length === 10);

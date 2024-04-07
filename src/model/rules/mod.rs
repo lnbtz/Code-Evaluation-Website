@@ -48,7 +48,6 @@ pub fn load_css_rules(rules_to_load: Vec<String>) -> Vec<Box<dyn Rule>> {
             Box::new(Minify) as Box<dyn Rule>,
         ];
     }
-    // TODO think of smart way to statically create rules and then load them when needed
     rules_to_load
         .iter()
         .map(|rule| match rule.as_str() {
@@ -63,7 +62,6 @@ pub fn load_html_rules(rules_to_load: Vec<String>) -> Vec<Box<dyn Rule>> {
     if rules_to_load.is_empty() {
         return vec![Box::new(html::loading::Loading) as Box<dyn Rule>];
     }
-    // TODO think of smart way to statically create rules and then load them when needed
     rules_to_load
         .iter()
         .map(|rule| match rule.as_str() {
@@ -81,7 +79,6 @@ pub fn load_js_rules(rules_to_load: Vec<String>) -> Vec<Box<dyn Rule>> {
             Box::new(js::duplicates::Duplicates) as Box<dyn Rule>,
         ];
     }
-    // TODO think of smart way to statically create rules and then load them when needed
     rules_to_load
         .iter()
         .map(|rule| match rule.as_str() {
@@ -97,7 +94,6 @@ fn load_java_rules(rules_to_load: Vec<String>) -> Vec<Box<dyn Rule>> {
     if rules_to_load.is_empty() {
         return vec![];
     }
-    // TODO think of smart way to statically create rules and then load them when needed
     rules_to_load
         .iter()
         .map(|rule| match rule.as_str() {

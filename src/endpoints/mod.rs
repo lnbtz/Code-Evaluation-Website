@@ -7,6 +7,7 @@ use axum::http::StatusCode;
 use axum::response::IntoResponse;
 use axum_extra::extract::Form;
 
+// region: templates
 #[derive(Template)]
 #[template(path = "evaluation.html")]
 pub struct EvaluationTemplate;
@@ -24,12 +25,14 @@ struct ShowRulesTemplate {
     checkboxes: Vec<RuleCheckbox>,
 }
 
+// endregion: templates
+// region: endpoints
 pub async fn home() -> impl IntoResponse {
     let template = EvaluationTemplate {};
     HtmlTemplate(template)
 }
 
-pub async fn evaluation(form: Form<Input>) -> impl IntoResponse {
+pub async fn evaluation(form: Form<EvaluationInputForm>) -> impl IntoResponse {
     let code = form.code.clone();
     let file_type = form.file_type.clone();
     let rules_to_apply = form.rules.clone();
@@ -63,40 +66,11 @@ pub async fn rules(Query(file_type): Query<RulesForFileType>) -> impl IntoRespon
     HtmlTemplate(template)
 }
 
-fn build_checkboxes_data(rules: Vec<Box<dyn Rule>>) -> Vec<RuleCheckbox> {
-    let checkboxes = rules
-        .iter()
-        .map(|rule| RuleCheckbox {
-            value: rule.get_name().to_lowercase(),
-            name: rule.get_name().to_string(),
-        })
-        .collect();
-    checkboxes
-}
-
-#[derive(Debug, serde::Deserialize)]
-pub struct Input {
-    code: String,
-    file_type: String,
-    #[serde(rename = "rule")]
-    rules: Vec<String>,
-}
-
-struct RuleCheckbox {
-    value: String,
-    name: String,
-}
-
-#[derive(serde::Deserialize)]
-pub struct RulesForFileType {
-    file_type: String,
-}
-
 pub async fn styles() -> impl IntoResponse {
     Response::builder()
         .status(StatusCode::OK)
         .header("Content-Type", "text/css")
-        .body(include_str!("../../templates/styles.css").to_owned())
+        .body(include_str!("../../styles/styles.css").to_owned())
         .unwrap()
 }
 
@@ -109,6 +83,37 @@ pub async fn image() -> impl IntoResponse {
         ))
         .unwrap()
 }
+// endregion: endpoints
+// region: helpers
+fn build_checkboxes_data(rules: Vec<Box<dyn Rule>>) -> Vec<RuleCheckbox> {
+    let checkboxes = rules
+        .iter()
+        .map(|rule| RuleCheckbox {
+            value: rule.get_name().to_lowercase(),
+            name: rule.get_name().to_string(),
+        })
+        .collect();
+    checkboxes
+}
+
+#[derive(Debug, serde::Deserialize)]
+pub struct EvaluationInputForm {
+    code: String,
+    file_type: String,
+    #[serde(rename = "rule")]
+    rules: Vec<String>,
+}
+
+#[derive(serde::Deserialize)]
+pub struct RulesForFileType {
+    file_type: String,
+}
+
+struct RuleCheckbox {
+    value: String,
+    name: String,
+}
+
 pub struct HtmlTemplate<T>(pub T);
 
 impl<T> IntoResponse for HtmlTemplate<T>
@@ -129,3 +134,4 @@ where
         }
     }
 }
+// endregion: helpers
