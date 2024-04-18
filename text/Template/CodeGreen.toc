@@ -9,7 +9,7 @@
 \contentsline {section}{\numberline {2.2}Inhaltsverzeichnis und andere Verzeichnisse}{3}{section.2.2}%
 \contentsline {section}{\numberline {2.3}Gliederungsebenen}{3}{section.2.3}%
 \contentsline {section}{\numberline {2.4}Literaturverzeichnis}{4}{section.2.4}%
-\contentsline {section}{\numberline {2.5}Anhang}{4}{section.2.5}%
+\contentsline {section}{\numberline {2.5}Anhang}{5}{section.2.5}%
 \contentsline {section}{\numberline {2.6}Eigenständigkeitserklärung}{5}{section.2.6}%
 \contentsline {chapter}{\numberline {3}{\TeX }nik und Typographie}{6}{chapter.3}%
 \contentsline {section}{\numberline {3.1}Verwendung der Vorlage}{6}{section.3.1}%
@@ -20,12 +20,12 @@
 \contentsline {section}{\numberline {3.4}PDF-Ausgabe}{8}{section.3.4}%
 \contentsline {section}{\numberline {3.5}Verweise}{8}{section.3.5}%
 \contentsline {subsection}{\numberline {3.5.1}Querverweise}{8}{subsection.3.5.1}%
-\contentsline {subsection}{\numberline {3.5.2}Zitate und Literaturverweise}{8}{subsection.3.5.2}%
+\contentsline {subsection}{\numberline {3.5.2}Zitate und Literaturverweise}{9}{subsection.3.5.2}%
 \contentsline {section}{\numberline {3.6}Mathematische Formeln}{9}{section.3.6}%
 \contentsline {section}{\numberline {3.7}Elemente in Gleitumgebungen}{10}{section.3.7}%
 \contentsline {subsection}{\numberline {3.7.1}Tabellen}{11}{subsection.3.7.1}%
-\contentsline {subsection}{\numberline {3.7.2}Abbildungen}{11}{subsection.3.7.2}%
+\contentsline {subsection}{\numberline {3.7.2}Abbildungen}{12}{subsection.3.7.2}%
 \contentsline {section}{\numberline {3.8}Code}{13}{section.3.8}%
-\contentsline {chapter}{\nonumberline Literatur}{15}{chapter*.5}%
-\contentsline {chapter}{\nonumberline Anhang}{16}{chapter*.6}%
+\contentsline {chapter}{\nonumberline Literatur}{16}{chapter*.5}%
+\contentsline {chapter}{\nonumberline Anhang}{17}{chapter*.6}%
 \providecommand \tocbasic@end@toc@file {}\tocbasic@end@toc@file 

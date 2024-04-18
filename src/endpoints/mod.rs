@@ -9,17 +9,22 @@ use axum::response::IntoResponse;
 use axum_extra::extract::Form;
 
 // region: templates
+/// EvaluationTemplate is a struct that holds the data for the evaluation template
 #[derive(Template)]
 #[template(path = "evaluation.html")]
 pub struct EvaluationTemplate;
 
+/// SuggestionsTemplate is a struct that holds the data for the suggestions template
 #[derive(Template)]
 #[template(path = "suggestions.html")]
 struct SuggestionsTemplate {
+    /// suggestions is a vector of LineResult that can be displayed in the frontend as suggestions with its fields
+    /// see suggestions.html for more information and check the askama documentation for more information on how to use templates
     suggestions: Vec<LineResult>,
     code: Vec<(String, String)>,
 }
 
+/// ShowRulesTemplate is a struct that holds the data for the rules template
 #[derive(Template)]
 #[template(path = "rules.html")]
 struct ShowRulesTemplate {
@@ -28,11 +33,13 @@ struct ShowRulesTemplate {
 
 // endregion: templates
 // region: endpoints
+/// home is the home endpoint that returns the home page
 pub async fn home() -> impl IntoResponse {
     let template = EvaluationTemplate {};
     HtmlTemplate(template)
 }
 
+/// evaluation is the evaluation endpoint that returns the evaluation page
 pub async fn evaluation(form: Form<EvaluationInputForm>) -> impl IntoResponse {
     let code = form.code.clone();
     let file_type = form.file_type.clone();
@@ -60,6 +67,7 @@ pub async fn evaluation(form: Form<EvaluationInputForm>) -> impl IntoResponse {
     HtmlTemplate(template)
 }
 
+/// rules is the rules endpoint that returns the rules page
 pub async fn rules(Query(file_type): Query<RulesForFileType>) -> impl IntoResponse {
     let rules = load_rules(file_type.file_type, vec![]);
     let checkboxes = build_checkboxes_data(rules);
@@ -67,6 +75,7 @@ pub async fn rules(Query(file_type): Query<RulesForFileType>) -> impl IntoRespon
     HtmlTemplate(template)
 }
 
+/// styles is the styles endpoint that returns the styles
 pub async fn styles() -> impl IntoResponse {
     Response::builder()
         .status(StatusCode::OK)
@@ -75,6 +84,7 @@ pub async fn styles() -> impl IntoResponse {
         .unwrap()
 }
 
+/// image is the image endpoint that returns the image
 pub async fn image() -> impl IntoResponse {
     Response::builder()
         .status(StatusCode::OK)
@@ -86,6 +96,7 @@ pub async fn image() -> impl IntoResponse {
 }
 // endregion: endpoints
 // region: helpers
+
 fn build_checkboxes_data(rules: Vec<Box<dyn Rule>>) -> Vec<RuleCheckbox> {
     let checkboxes = rules
         .iter()

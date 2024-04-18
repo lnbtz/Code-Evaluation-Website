@@ -7,8 +7,9 @@ use oxc::span::{GetSpan, SourceType};
 
 use super::Rule;
 
+/// Rule to check for method calls in javascript can be modified to check for other methods
+/// checks for static and instance method calls
 pub struct Methods;
-
 impl Rule for Methods {
     fn get_name(&self) -> &str {
         "JS-Method-Calls"
@@ -50,39 +51,42 @@ impl Rule for Methods {
     }
 }
 
+/// MethodFinder is a visitor that finds method calls in javascript
 #[derive(Debug, Default)]
 struct MethodFinder {
     function_name_spans: Vec<(String, u32, u32)>,
+    /// methods to look for
     methods: Vec<String>,
 }
 
 impl<'a> Visit<'a> for MethodFinder {
     fn enter_node(&mut self, kind: AstKind<'a>) {
-        if let AstKind::CallExpression(call_expression) = kind {
-            let method_name = if call_expression.callee.is_identifier_reference() {
-                call_expression
-                    .callee
-                    .get_identifier_reference()
-                    .unwrap()
-                    .name
-                    .to_string()
-            } else {
-                call_expression
-                    .callee
-                    .get_member_expr()
-                    .unwrap()
-                    .static_property_name()
-                    .unwrap()
-                    .to_string()
-            };
-            if self.methods.contains(&method_name) {
-                self.function_name_spans.push((
-                    method_name,
-                    call_expression.callee.span().start,
-                    call_expression.callee.span().end,
-                ))
-            };
-        }
+        dbg!(kind.identifier_name());
+        // if let AstKind::CallExpression(call_expression) = kind {
+        //     let method_name = if call_expression.callee.is_identifier_reference() {
+        //         call_expression
+        //             .callee
+        //             .get_identifier_reference()
+        //             .unwrap()
+        //             .name
+        //             .to_string()
+        //     } else {
+        //         call_expression
+        //             .callee
+        //             .get_member_expr()
+        //             .unwrap()
+        //             .static_property_name()
+        //             .unwrap()
+        //             .to_string()
+        //     };
+        //     if self.methods.contains(&method_name) {
+        //         self.function_name_spans.push((
+        //             method_name,
+        //             call_expression.callee.span().start,
+        //             call_expression.callee.span().end,
+        //         ))
+        //     };
+        // }
     }
 }
 
@@ -101,4 +105,23 @@ fn line_column(input: &str, start: u32) -> (i32, i32) {
         }
     }
     (line, column)
+}
+
+mod tests {
+    use super::*;
+    #[test]
+    fn test_visit_program_arrow_two_params_strict_equality_regular() {
+        let allocator = Allocator::default();
+        let source_text =
+            "let uniqueArray = array.filter((item, index) => array.indexOf(item) === index);";
+        let source_type = SourceType::from_path("javscript.js").unwrap();
+        let ret = Parser::new(&allocator, source_text, source_type).parse();
+        let program = ret.program;
+
+        let mut ast_pass = MethodFinder {
+            function_name_spans: vec![],
+            methods: vec![String::from("indexOf")],
+        };
+        ast_pass.visit_program(&program);
+    }
 }

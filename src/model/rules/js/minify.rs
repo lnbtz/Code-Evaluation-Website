@@ -2,8 +2,8 @@ use crate::model::rules::LineResult;
 
 use super::Rule;
 
+/// Rule to check for minification of javascript
 pub struct Minify;
-
 impl Rule for Minify {
     fn get_name(&self) -> &str {
         "JS-Minify"

@@ -4,13 +4,17 @@ pub mod css;
 pub mod html;
 pub mod js;
 
-// rules interface here with one function that returns a line result or nothing
+/// Rule trait that all rules must implement
 pub trait Rule {
+    /// get the name of the rule
     fn get_name(&self) -> &str;
+    /// get the description of the rule
     fn get_description(&self) -> &str;
+    /// apply the rule to the input and return the results
     fn apply(&self, input: &str) -> Option<Vec<LineResult>>;
 }
-// also uses these structs to build the line result
+
+/// LineResult is a struct that holds the result of a rule applied to a line
 #[derive(Clone)]
 pub struct LineResult {
     pub severity: Severity,
@@ -20,6 +24,7 @@ pub struct LineResult {
     pub description: String,
 }
 
+/// Severity is an enum that holds the severity of a rule
 #[derive(Debug, Clone)]
 pub enum Severity {
     Warning,
@@ -31,16 +36,18 @@ impl std::fmt::Display for Severity {
     }
 }
 
-pub fn load_rules(file_typle: String, rules_to_load: Vec<String>) -> Vec<Box<dyn Rule>> {
-    match file_typle.as_str() {
+/// load_rules loads the rules based on the file type and the rules to load
+pub fn load_rules(file_type: String, rules_to_load: Vec<String>) -> Vec<Box<dyn Rule>> {
+    match file_type.as_str() {
         "css" => load_css_rules(rules_to_load),
         "html" => load_html_rules(rules_to_load),
         "js" => load_js_rules(rules_to_load),
         "java" => load_java_rules(rules_to_load),
-        _ => panic!("Unknown file type: {}", file_typle),
+        _ => panic!("Unknown file type: {}", file_type),
     }
 }
 
+/// load_css_rules loads the css rules based on the rules to load
 pub fn load_css_rules(rules_to_load: Vec<String>) -> Vec<Box<dyn Rule>> {
     if rules_to_load.is_empty() {
         return vec![
@@ -58,6 +65,7 @@ pub fn load_css_rules(rules_to_load: Vec<String>) -> Vec<Box<dyn Rule>> {
         .collect()
 }
 
+/// load_html_rules loads the html rules based on the rules to load
 pub fn load_html_rules(rules_to_load: Vec<String>) -> Vec<Box<dyn Rule>> {
     if rules_to_load.is_empty() {
         return vec![Box::new(html::loading::Loading) as Box<dyn Rule>];
@@ -71,6 +79,7 @@ pub fn load_html_rules(rules_to_load: Vec<String>) -> Vec<Box<dyn Rule>> {
         .collect()
 }
 
+/// load_js_rules loads the js rules based on the rules to load
 pub fn load_js_rules(rules_to_load: Vec<String>) -> Vec<Box<dyn Rule>> {
     if rules_to_load.is_empty() {
         return vec![
@@ -90,6 +99,7 @@ pub fn load_js_rules(rules_to_load: Vec<String>) -> Vec<Box<dyn Rule>> {
         .collect()
 }
 
+/// load_java_rules loads the java rules based on the rules to load
 fn load_java_rules(rules_to_load: Vec<String>) -> Vec<Box<dyn Rule>> {
     if rules_to_load.is_empty() {
         return vec![];

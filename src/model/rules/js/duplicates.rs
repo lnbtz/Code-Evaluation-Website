@@ -63,6 +63,7 @@ impl Rule for Duplicates {
 }
 
 #[derive(Debug, Default)]
+/// This struct is used to find filter method calls that remove duplicates from an array
 struct ArrayDuplicatesPatternFinder {
     function_name_spans: Vec<(String, u32, u32)>,
     array_identifier: String,
@@ -70,23 +71,40 @@ struct ArrayDuplicatesPatternFinder {
     pos: String,
 }
 
+// entrypoint for the visitor pattern
+impl<'a> Visit<'a> for ArrayDuplicatesPatternFinder {
+    fn enter_node(&mut self, kind: AstKind<'a>) {
+        // match method calls 'CallExpression'
+        if let AstKind::CallExpression(call_expression) = kind {
+            // match 'filter' method call
+            if is_filter_method(call_expression) {
+                self.array_identifier =
+                    get_function_target_identifier_name(call_expression).to_string();
+                // match 'filter' call arguments and check for expression
+                if let Expression(function_expression) = &call_expression.arguments[0] {
+                    match &function_expression.get_inner_expression() {
+                        // match arrow function expression
+                        ArrowFunctionExpression(arrow_function_expression) => {
+                            // handle arrow function expression
+                            self.handle_arrow_function_expression(arrow_function_expression);
+                        }
+                        // match function expression
+                        FunctionExpression(function_expression) => {
+                            // handle function expression
+                            self.handle_function_expression(function_expression);
+                        }
+                        _ => {}
+                    }
+                };
+            }
+        }
+    }
+}
+
 impl ArrayDuplicatesPatternFinder {
     // region: handlers
-    fn handle_function_expression<'a>(
-        &mut self,
-        function_expression: &'a oxc::allocator::Box<'a, oxc::ast::ast::Function<'a>>,
-    ) {
-        if function_expression.params.items.len() >= 2 && function_expression.body.is_some() {
-            // get all the parameters of the function and set them to the item and pos variables
-            self.extract_binding_identifiers_from_function_expression(function_expression);
-            if let Some(body) = &function_expression.body {
-                if body.statements.len() > 0 {
-                    self.handle_return_statement(body);
-                }
-            }
-        };
-    }
 
+    /// Handle the arrow function expression and check its bodies validity for further processing
     fn handle_arrow_function_expression<'a>(
         &mut self,
         arrow_function_expression: &'a oxc::allocator::Box<
@@ -104,6 +122,22 @@ impl ArrayDuplicatesPatternFinder {
         };
     }
 
+    /// Handle the function expression and check its bodies validity for further processing
+    fn handle_function_expression<'a>(
+        &mut self,
+        function_expression: &'a oxc::allocator::Box<'a, oxc::ast::ast::Function<'a>>,
+    ) {
+        if function_expression.params.items.len() >= 2 && function_expression.body.is_some() {
+            self.extract_binding_identifiers_from_function_expression(function_expression);
+            if let Some(body) = &function_expression.body {
+                if body.statements.len() > 0 {
+                    self.handle_return_statement(body);
+                }
+            }
+        };
+    }
+
+    /// Handle the expression statement and the internal binary expression
     fn handle_expression_statement<'a>(
         &mut self,
         function_body: &'a oxc::allocator::Box<'a, oxc::ast::ast::FunctionBody<'a>>,
@@ -115,6 +149,7 @@ impl ArrayDuplicatesPatternFinder {
         }
     }
 
+    /// Handle the return statement and the internal binary expression
     fn handle_return_statement<'a>(
         &mut self,
         function_body: &'a oxc::allocator::Box<'a, oxc::ast::ast::FunctionBody<'a>>,
@@ -126,6 +161,7 @@ impl ArrayDuplicatesPatternFinder {
         }
     }
 
+    /// Handle the binary expression and check if it is a valid indexOf method call
     fn handle_binary_expression<'a>(
         &mut self,
         binary_expression: &'a oxc::allocator::Box<'a, oxc::ast::ast::BinaryExpression<'a>>,
@@ -139,20 +175,21 @@ impl ArrayDuplicatesPatternFinder {
             if let CallExpression(call_expression) = &binary_expression.right {
                 if let Some(index) = binary_expression.left.get_identifier_reference() {
                     if index.name == self.pos && call_expression.arguments.len() == 1 {
-                        self.handle_call_expression(call_expression);
+                        self.handle_indexof_call_expression(call_expression);
                     }
                 }
             } else if let CallExpression(call_expression) = &binary_expression.left {
                 if let Some(index) = binary_expression.right.get_identifier_reference() {
                     if index.name == self.pos && call_expression.arguments.len() == 1 {
-                        self.handle_call_expression(call_expression);
+                        self.handle_indexof_call_expression(call_expression);
                     }
                 }
             }
         }
     }
 
-    fn handle_call_expression<'a>(
+    /// Handle the call expression and check if it is a valid indexOf method call
+    fn handle_indexof_call_expression<'a>(
         &mut self,
         call_expression: &'a oxc::allocator::Box<'a, oxc::ast::ast::CallExpression<'a>>,
     ) {
@@ -179,6 +216,7 @@ impl ArrayDuplicatesPatternFinder {
     // endregion: handlers
 
     // region: helpers
+    /// Check if the call expression has valid 'item' parameter
     fn has_valid_param<'a>(
         &mut self,
         call_expression: &oxc::allocator::Box<'a, oxc::ast::ast::CallExpression<'a>>,
@@ -194,6 +232,7 @@ impl ArrayDuplicatesPatternFinder {
         }
     }
 
+    /// Extract the binding identifiers from the function expression for item and pos for later matching
     fn extract_binding_identifiers_from_function_expression<'a>(
         &mut self,
         function_expression: &oxc::allocator::Box<'a, oxc::ast::ast::Function<'a>>,
@@ -210,6 +249,7 @@ impl ArrayDuplicatesPatternFinder {
         }
     }
 
+    /// Extract the binding identifiers from the arrow function expression for item and pos for later matching
     fn extract_binding_identifiers_from_arrow_function<'a>(
         &mut self,
         arrow_function_expression: &oxc::allocator::Box<
@@ -232,6 +272,8 @@ impl ArrayDuplicatesPatternFinder {
 }
 
 // region: helpers
+
+/// Get the name (identifier) of the function target
 fn get_function_target_identifier_name<'a>(
     call_expression: &'a oxc::ast::ast::CallExpression<'a>,
 ) -> &'a oxc::span::Atom {
@@ -245,6 +287,8 @@ fn get_function_target_identifier_name<'a>(
         .unwrap()
         .name
 }
+
+/// Check if the call expression is a filter method call with one argument
 fn is_filter_method(call_expression: &oxc::ast::ast::CallExpression<'_>) -> bool {
     if let Some(callee) = call_expression.callee.get_member_expr() {
         if let Some(static_property_name) = callee.static_property_name() {
@@ -253,6 +297,8 @@ fn is_filter_method(call_expression: &oxc::ast::ast::CallExpression<'_>) -> bool
     }
     false
 }
+
+/// Get the line and column of a given start position in the given input string
 fn line_column(input: &str, start: u32) -> (i32, i32) {
     let mut line = 1;
     let mut column = 0;
@@ -269,6 +315,8 @@ fn line_column(input: &str, start: u32) -> (i32, i32) {
     }
     (line, column)
 }
+
+/// Check if the arrow function expression has the correct number of parameters and is a non empty return statement
 fn is_valid_return_statement<'a>(
     arrow_function_expression: &oxc::allocator::Box<'a, oxc::ast::ast::ArrowFunctionExpression<'a>>,
     function_body: &oxc::allocator::Box<'a, oxc::ast::ast::FunctionBody<'a>>,
@@ -278,6 +326,7 @@ fn is_valid_return_statement<'a>(
         && function_body.statements.len() > 0
 }
 
+/// Check if the arrow function expression has the correct number of parameters and is a non empty expression statement
 fn is_valid_expression_statement<'a>(
     arrow_function_expression: &oxc::allocator::Box<'a, oxc::ast::ast::ArrowFunctionExpression<'a>>,
     function_body: &oxc::allocator::Box<'a, oxc::ast::ast::FunctionBody<'a>>,
@@ -287,35 +336,6 @@ fn is_valid_expression_statement<'a>(
         && function_body.statements.len() > 0
 }
 // endregion: helpers
-impl<'a> Visit<'a> for ArrayDuplicatesPatternFinder {
-    fn enter_node(&mut self, kind: AstKind<'a>) {
-        // match method call
-        if let AstKind::CallExpression(call_expression) = kind {
-            // match method call 'filter'
-            if is_filter_method(call_expression) {
-                self.array_identifier =
-                    get_function_target_identifier_name(call_expression).to_string();
-                // match 'filter' call arguments and check for expression
-                if let Expression(function_expression) = &call_expression.arguments[0] {
-                    match &function_expression.get_inner_expression() {
-                        // match arrow function expression
-                        ArrowFunctionExpression(arrow_function_expression) => {
-                            // handle arrow function expression
-                            self.handle_arrow_function_expression(arrow_function_expression);
-                        }
-                        // match function expression
-                        FunctionExpression(function_expression) => {
-                            // handle function expression
-                            self.handle_function_expression(function_expression);
-                        }
-                        _ => {}
-                    }
-                };
-            }
-        }
-    }
-}
-
 // region: tests
 #[cfg(test)]
 mod tests {
