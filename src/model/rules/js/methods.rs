@@ -9,29 +9,37 @@ use super::Rule;
 
 /// Rule to check for method calls in javascript can be modified to check for other methods
 /// checks for static and instance method calls
-pub struct Methods;
+/// TODO: add more methods to check for that are for example not recommended because of performance reasons or because they are deprecated
+#[derive(Default)]
+pub struct Methods {
+    function_name_spans: Vec<(String, u32, u32)>,
+    /// methods to look for
+    methods: Vec<String>,
+}
 impl Rule for Methods {
     fn get_name(&self) -> &str {
         "JS-Method-Calls"
     }
     fn get_description(&self) -> &str {
-        // TODO add link to minify js
+        // TODO add proper description
         "consider not using marked method calls and use checkout suggestions for alternatives"
     }
     fn apply(&self, input: &str) -> Option<std::vec::Vec<LineResult>> {
         let mut result = vec![];
+        let mut method_finder = Methods {
+            function_name_spans: vec![],
+            methods: vec![String::from("height")],
+        };
+        // boilerplate for js parsing
         let allocator = Allocator::default();
         let source_text = input;
         let source_type = SourceType::from_path("javscript.js").unwrap();
         let ret = Parser::new(&allocator, source_text, source_type).parse();
         let program = ret.program;
+        method_finder.visit_program(&program);
 
-        let mut ast_pass = MethodFinder {
-            function_name_spans: vec![],
-            methods: vec![String::from("height")],
-        };
-        ast_pass.visit_program(&program);
-        for (function_name, start, _end) in ast_pass.function_name_spans {
+        // collect the results
+        for (function_name, start, _end) in method_finder.function_name_spans {
             let (line, column) = line_column(input, start);
             let classification = "bad method".to_string();
             let description = format!(
@@ -51,42 +59,33 @@ impl Rule for Methods {
     }
 }
 
-/// MethodFinder is a visitor that finds method calls in javascript
-#[derive(Debug, Default)]
-struct MethodFinder {
-    function_name_spans: Vec<(String, u32, u32)>,
-    /// methods to look for
-    methods: Vec<String>,
-}
-
-impl<'a> Visit<'a> for MethodFinder {
+impl<'a> Visit<'a> for Methods {
     fn enter_node(&mut self, kind: AstKind<'a>) {
-        dbg!(kind.identifier_name());
-        // if let AstKind::CallExpression(call_expression) = kind {
-        //     let method_name = if call_expression.callee.is_identifier_reference() {
-        //         call_expression
-        //             .callee
-        //             .get_identifier_reference()
-        //             .unwrap()
-        //             .name
-        //             .to_string()
-        //     } else {
-        //         call_expression
-        //             .callee
-        //             .get_member_expr()
-        //             .unwrap()
-        //             .static_property_name()
-        //             .unwrap()
-        //             .to_string()
-        //     };
-        //     if self.methods.contains(&method_name) {
-        //         self.function_name_spans.push((
-        //             method_name,
-        //             call_expression.callee.span().start,
-        //             call_expression.callee.span().end,
-        //         ))
-        //     };
-        // }
+        if let AstKind::CallExpression(call_expression) = kind {
+            let method_name = if call_expression.callee.is_identifier_reference() {
+                call_expression
+                    .callee
+                    .get_identifier_reference()
+                    .unwrap()
+                    .name
+                    .to_string()
+            } else {
+                call_expression
+                    .callee
+                    .get_member_expr()
+                    .unwrap()
+                    .static_property_name()
+                    .unwrap()
+                    .to_string()
+            };
+            if self.methods.contains(&method_name) {
+                self.function_name_spans.push((
+                    method_name,
+                    call_expression.callee.span().start,
+                    call_expression.callee.span().end,
+                ))
+            };
+        }
     }
 }
 
@@ -108,7 +107,7 @@ fn line_column(input: &str, start: u32) -> (i32, i32) {
 }
 
 mod tests {
-    use super::*;
+
     #[test]
     fn test_visit_program_arrow_two_params_strict_equality_regular() {
         let allocator = Allocator::default();
@@ -118,10 +117,12 @@ mod tests {
         let ret = Parser::new(&allocator, source_text, source_type).parse();
         let program = ret.program;
 
-        let mut ast_pass = MethodFinder {
+        let mut method_finder = Methods {
             function_name_spans: vec![],
             methods: vec![String::from("indexOf")],
         };
-        ast_pass.visit_program(&program);
+        method_finder.visit_program(&program);
+        assert_eq!(method_finder.function_name_spans.len(), 1);
+        assert_eq!(method_finder.function_name_spans[0].0, "indexOf");
     }
 }

@@ -5,11 +5,11 @@ use axum::{
     routing::{get, post},
     Router,
 };
-use endpoints::{evaluation, home, styles};
+use endpoints::{evaluation, home, image, rules, styles};
 use tracing::info;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
-use crate::endpoints::{image, rules};
+// use crate::endpoints::{image, rules};
 
 #[tokio::main]
 async fn main() {

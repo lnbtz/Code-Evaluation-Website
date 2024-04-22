@@ -9,7 +9,6 @@ impl Rule for Minify {
         "JS-Minify"
     }
     fn get_description(&self) -> &str {
-        // TODO add link to minify js
         "consider minifying the input to save javascript file size and thus bandwidth. click link to minify your javascript https://www.minifier.org/ or use a bundler like webpack"
     }
     fn apply(&self, input: &str) -> Option<std::vec::Vec<LineResult>> {

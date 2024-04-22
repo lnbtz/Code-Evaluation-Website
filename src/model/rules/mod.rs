@@ -1,4 +1,4 @@
-use self::css::{dry::Dry, minify::Minify};
+use self::css::minify::Minify;
 
 pub mod css;
 pub mod html;
@@ -50,15 +50,11 @@ pub fn load_rules(file_type: String, rules_to_load: Vec<String>) -> Vec<Box<dyn 
 /// load_css_rules loads the css rules based on the rules to load
 pub fn load_css_rules(rules_to_load: Vec<String>) -> Vec<Box<dyn Rule>> {
     if rules_to_load.is_empty() {
-        return vec![
-            Box::new(Dry) as Box<dyn Rule>,
-            Box::new(Minify) as Box<dyn Rule>,
-        ];
+        return vec![Box::new(Minify) as Box<dyn Rule>];
     }
     rules_to_load
         .iter()
         .map(|rule| match rule.as_str() {
-            "css-dry" => Box::new(Dry) as Box<dyn Rule>,
             "css-minify" => Box::new(Minify) as Box<dyn Rule>,
             _ => panic!("Unknown rule: {}", rule),
         })
@@ -84,16 +80,16 @@ pub fn load_js_rules(rules_to_load: Vec<String>) -> Vec<Box<dyn Rule>> {
     if rules_to_load.is_empty() {
         return vec![
             Box::new(js::minify::Minify) as Box<dyn Rule>,
-            Box::new(js::methods::Methods) as Box<dyn Rule>,
-            Box::new(js::duplicates::Duplicates) as Box<dyn Rule>,
+            Box::new(js::methods::Methods::default()) as Box<dyn Rule>,
+            Box::new(js::duplicates::Duplicates::default()) as Box<dyn Rule>,
         ];
     }
     rules_to_load
         .iter()
         .map(|rule| match rule.as_str() {
             "js-minify" => Box::new(js::minify::Minify) as Box<dyn Rule>,
-            "js-method-calls" => Box::new(js::methods::Methods) as Box<dyn Rule>,
-            "js-duplicates" => Box::new(js::duplicates::Duplicates) as Box<dyn Rule>,
+            "js-method-calls" => Box::new(js::methods::Methods::default()) as Box<dyn Rule>,
+            "js-duplicates" => Box::new(js::duplicates::Duplicates::default()) as Box<dyn Rule>,
             _ => panic!("Unknown rule: {}", rule),
         })
         .collect()

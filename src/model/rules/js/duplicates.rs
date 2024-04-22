@@ -18,8 +18,13 @@ use oxc::syntax::operator::BinaryOperator::Equality;
 use oxc::syntax::operator::BinaryOperator::StrictEquality;
 
 use super::Rule;
-
-pub struct Duplicates;
+#[derive(Debug, Default)]
+pub struct Duplicates {
+    function_name_spans: Vec<(String, u32, u32)>,
+    array_identifier: String,
+    item: String,
+    pos: String,
+}
 
 impl Rule for Duplicates {
     fn get_name(&self) -> &str {
@@ -36,17 +41,11 @@ impl Rule for Duplicates {
         let source_type = SourceType::from_path("javscript.js").unwrap();
         let ret = Parser::new(&allocator, source_text, source_type).parse();
         let program = ret.program;
+        let mut duplicates: Duplicates = Duplicates::default();
+        duplicates.visit_program(&program);
 
-        let mut array_duplicates_pattern_finder = ArrayDuplicatesPatternFinder {
-            function_name_spans: vec![],
-            array_identifier: String::from(""),
-            item: String::from(""),
-            pos: String::from(""),
-        };
-        array_duplicates_pattern_finder.visit_program(&program);
-
-        for (_function_name, start, _end) in array_duplicates_pattern_finder.function_name_spans {
-            let (line, column) = line_column(input, start);
+        for (_function_name, start, _end) in &duplicates.function_name_spans {
+            let (line, column) = line_column(input, *start);
             let classification = "bad method".to_string();
             let description = self.get_description().to_string();
             let line_result = LineResult {
@@ -62,17 +61,9 @@ impl Rule for Duplicates {
     }
 }
 
-#[derive(Debug, Default)]
 /// This struct is used to find filter method calls that remove duplicates from an array
-struct ArrayDuplicatesPatternFinder {
-    function_name_spans: Vec<(String, u32, u32)>,
-    array_identifier: String,
-    item: String,
-    pos: String,
-}
-
-// entrypoint for the visitor pattern
-impl<'a> Visit<'a> for ArrayDuplicatesPatternFinder {
+impl<'a> Visit<'a> for Duplicates {
+    // entrypoint for the visitor pattern
     fn enter_node(&mut self, kind: AstKind<'a>) {
         // match method calls 'CallExpression'
         if let AstKind::CallExpression(call_expression) = kind {
@@ -101,7 +92,7 @@ impl<'a> Visit<'a> for ArrayDuplicatesPatternFinder {
     }
 }
 
-impl ArrayDuplicatesPatternFinder {
+impl Duplicates {
     // region: handlers
 
     /// Handle the arrow function expression and check its bodies validity for further processing
@@ -399,7 +390,7 @@ mod tests {
         let ret = Parser::new(&allocator, source_text, source_type).parse();
         let program = ret.program;
 
-        let mut ast_pass = ArrayDuplicatesPatternFinder {
+        let mut ast_pass = Duplicates {
             function_name_spans: vec![],
             array_identifier: String::from(""),
             item: String::from(""),
@@ -419,7 +410,7 @@ mod tests {
         let ret = Parser::new(&allocator, source_text, source_type).parse();
         let program = ret.program;
 
-        let mut ast_pass = ArrayDuplicatesPatternFinder {
+        let mut ast_pass = Duplicates {
             function_name_spans: vec![],
             array_identifier: String::from(""),
             item: String::from(""),
@@ -439,7 +430,7 @@ mod tests {
         let ret = Parser::new(&allocator, source_text, source_type).parse();
         let program = ret.program;
 
-        let mut ast_pass = ArrayDuplicatesPatternFinder {
+        let mut ast_pass = Duplicates {
             function_name_spans: vec![],
             array_identifier: String::from(""),
             item: String::from(""),
@@ -459,7 +450,7 @@ mod tests {
         let ret = Parser::new(&allocator, source_text, source_type).parse();
         let program = ret.program;
 
-        let mut ast_pass = ArrayDuplicatesPatternFinder {
+        let mut ast_pass = Duplicates {
             function_name_spans: vec![],
             array_identifier: String::from(""),
             item: String::from(""),
@@ -479,7 +470,7 @@ mod tests {
         let ret = Parser::new(&allocator, source_text, source_type).parse();
         let program = ret.program;
 
-        let mut ast_pass = ArrayDuplicatesPatternFinder {
+        let mut ast_pass = Duplicates {
             function_name_spans: vec![],
             array_identifier: String::from(""),
             item: String::from(""),
@@ -499,7 +490,7 @@ mod tests {
         let ret = Parser::new(&allocator, source_text, source_type).parse();
         let program = ret.program;
 
-        let mut ast_pass = ArrayDuplicatesPatternFinder {
+        let mut ast_pass = Duplicates {
             function_name_spans: vec![],
             array_identifier: String::from(""),
             item: String::from(""),
@@ -519,7 +510,7 @@ mod tests {
         let ret = Parser::new(&allocator, source_text, source_type).parse();
         let program = ret.program;
 
-        let mut ast_pass = ArrayDuplicatesPatternFinder {
+        let mut ast_pass = Duplicates {
             function_name_spans: vec![],
             array_identifier: String::from(""),
             item: String::from(""),
@@ -539,7 +530,7 @@ mod tests {
         let ret = Parser::new(&allocator, source_text, source_type).parse();
         let program = ret.program;
 
-        let mut ast_pass = ArrayDuplicatesPatternFinder {
+        let mut ast_pass = Duplicates {
             function_name_spans: vec![],
             array_identifier: String::from(""),
             item: String::from(""),
@@ -559,7 +550,7 @@ mod tests {
         let ret = Parser::new(&allocator, source_text, source_type).parse();
         let program = ret.program;
 
-        let mut ast_pass = ArrayDuplicatesPatternFinder {
+        let mut ast_pass = Duplicates {
             function_name_spans: vec![],
             array_identifier: String::from(""),
             item: String::from(""),
@@ -579,7 +570,7 @@ mod tests {
         let ret = Parser::new(&allocator, source_text, source_type).parse();
         let program = ret.program;
 
-        let mut ast_pass = ArrayDuplicatesPatternFinder {
+        let mut ast_pass = Duplicates {
             function_name_spans: vec![],
             array_identifier: String::from(""),
             item: String::from(""),
@@ -599,7 +590,7 @@ mod tests {
         let ret = Parser::new(&allocator, source_text, source_type).parse();
         let program = ret.program;
 
-        let mut ast_pass = ArrayDuplicatesPatternFinder {
+        let mut ast_pass = Duplicates {
             function_name_spans: vec![],
             array_identifier: String::from(""),
             item: String::from(""),
@@ -619,7 +610,7 @@ mod tests {
         let ret = Parser::new(&allocator, source_text, source_type).parse();
         let program = ret.program;
 
-        let mut ast_pass = ArrayDuplicatesPatternFinder {
+        let mut ast_pass = Duplicates {
             function_name_spans: vec![],
             array_identifier: String::from(""),
             item: String::from(""),
@@ -639,7 +630,7 @@ mod tests {
         let ret = Parser::new(&allocator, source_text, source_type).parse();
         let program = ret.program;
 
-        let mut ast_pass = ArrayDuplicatesPatternFinder {
+        let mut ast_pass = Duplicates {
             function_name_spans: vec![],
             array_identifier: String::from(""),
             item: String::from(""),
@@ -659,7 +650,7 @@ mod tests {
         let ret = Parser::new(&allocator, source_text, source_type).parse();
         let program = ret.program;
 
-        let mut ast_pass = ArrayDuplicatesPatternFinder {
+        let mut ast_pass = Duplicates {
             function_name_spans: vec![],
             array_identifier: String::from(""),
             item: String::from(""),
@@ -679,7 +670,7 @@ mod tests {
         let ret = Parser::new(&allocator, source_text, source_type).parse();
         let program = ret.program;
 
-        let mut ast_pass = ArrayDuplicatesPatternFinder {
+        let mut ast_pass = Duplicates {
             function_name_spans: vec![],
             array_identifier: String::from(""),
             item: String::from(""),
@@ -699,7 +690,7 @@ mod tests {
         let ret = Parser::new(&allocator, source_text, source_type).parse();
         let program = ret.program;
 
-        let mut ast_pass = ArrayDuplicatesPatternFinder {
+        let mut ast_pass = Duplicates {
             function_name_spans: vec![],
             array_identifier: String::from(""),
             item: String::from(""),
@@ -720,7 +711,7 @@ mod tests {
         let ret = Parser::new(&allocator, source_text, source_type).parse();
         let program = ret.program;
 
-        let mut ast_pass = ArrayDuplicatesPatternFinder {
+        let mut ast_pass = Duplicates {
             function_name_spans: vec![],
             array_identifier: String::from(""),
             item: String::from(""),
@@ -741,7 +732,7 @@ mod tests {
         let ret = Parser::new(&allocator, source_text, source_type).parse();
         let program = ret.program;
 
-        let mut ast_pass = ArrayDuplicatesPatternFinder {
+        let mut ast_pass = Duplicates {
             function_name_spans: vec![],
             array_identifier: String::from(""),
             item: String::from(""),
@@ -761,7 +752,7 @@ mod tests {
         let source_type = SourceType::from_path("javscript.js").unwrap();
         let ret = Parser::new(&allocator, source_text, source_type).parse();
         let program = ret.program;
-        let mut ast_pass = ArrayDuplicatesPatternFinder {
+        let mut ast_pass = Duplicates {
             function_name_spans: vec![],
             array_identifier: String::from(""),
             item: String::from(""),
@@ -782,7 +773,7 @@ mod tests {
         let source_type = SourceType::from_path("javscript.js").unwrap();
         let ret = Parser::new(&allocator, source_text, source_type).parse();
         let program = ret.program;
-        let mut ast_pass = ArrayDuplicatesPatternFinder {
+        let mut ast_pass = Duplicates {
             function_name_spans: vec![],
             array_identifier: String::from(""),
             item: String::from(""),
@@ -803,7 +794,7 @@ mod tests {
         let source_type = SourceType::from_path("javscript.js").unwrap();
         let ret = Parser::new(&allocator, source_text, source_type).parse();
         let program = ret.program;
-        let mut ast_pass = ArrayDuplicatesPatternFinder {
+        let mut ast_pass = Duplicates {
             function_name_spans: vec![],
             array_identifier: String::from(""),
             item: String::from(""),
@@ -824,7 +815,7 @@ mod tests {
         let source_type = SourceType::from_path("javscript.js").unwrap();
         let ret = Parser::new(&allocator, source_text, source_type).parse();
         let program = ret.program;
-        let mut ast_pass = ArrayDuplicatesPatternFinder {
+        let mut ast_pass = Duplicates {
             function_name_spans: vec![],
             array_identifier: String::from(""),
             item: String::from(""),
@@ -845,7 +836,7 @@ mod tests {
         let source_type = SourceType::from_path("javscript.js").unwrap();
         let ret = Parser::new(&allocator, source_text, source_type).parse();
         let program = ret.program;
-        let mut ast_pass = ArrayDuplicatesPatternFinder {
+        let mut ast_pass = Duplicates {
             function_name_spans: vec![],
             array_identifier: String::from(""),
             item: String::from(""),
@@ -866,7 +857,7 @@ mod tests {
         let source_type = SourceType::from_path("javscript.js").unwrap();
         let ret = Parser::new(&allocator, source_text, source_type).parse();
         let program = ret.program;
-        let mut ast_pass = ArrayDuplicatesPatternFinder {
+        let mut ast_pass = Duplicates {
             function_name_spans: vec![],
             array_identifier: String::from(""),
             item: String::from(""),
@@ -887,7 +878,7 @@ mod tests {
         let ret = Parser::new(&allocator, source_text, source_type).parse();
         let program = ret.program;
 
-        let mut ast_pass = ArrayDuplicatesPatternFinder {
+        let mut ast_pass = Duplicates {
             function_name_spans: vec![],
             array_identifier: String::from(""),
             item: String::from(""),
@@ -905,7 +896,7 @@ mod tests {
         let source_type = SourceType::from_path("javscript.js").unwrap();
         let ret = Parser::new(&allocator, source_text, source_type).parse();
         let program = ret.program;
-        let mut ast_pass = ArrayDuplicatesPatternFinder {
+        let mut ast_pass = Duplicates {
             function_name_spans: vec![],
             array_identifier: String::from(""),
             item: String::from(""),
@@ -925,7 +916,7 @@ mod tests {
         let ret = Parser::new(&allocator, source_text, source_type).parse();
         let program = ret.program;
 
-        let mut ast_pass = ArrayDuplicatesPatternFinder {
+        let mut ast_pass = Duplicates {
             function_name_spans: vec![],
             array_identifier: String::from(""),
             item: String::from(""),
@@ -944,7 +935,7 @@ mod tests {
         let ret = Parser::new(&allocator, source_text, source_type).parse();
         let program = ret.program;
 
-        let mut ast_pass = ArrayDuplicatesPatternFinder {
+        let mut ast_pass = Duplicates {
             function_name_spans: vec![],
             array_identifier: String::from(""),
             item: String::from(""),
@@ -964,7 +955,7 @@ mod tests {
         let ret = Parser::new(&allocator, source_text, source_type).parse();
         let program = ret.program;
 
-        let mut ast_pass = ArrayDuplicatesPatternFinder {
+        let mut ast_pass = Duplicates {
             function_name_spans: vec![],
             array_identifier: String::from(""),
             item: String::from(""),
