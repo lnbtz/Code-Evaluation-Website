@@ -20,7 +20,8 @@ use oxc::syntax::operator::BinaryOperator::StrictEquality;
 use super::Rule;
 #[derive(Debug, Default)]
 pub struct Duplicates {
-    function_name_spans: Vec<(String, u32, u32)>,
+    /// function name, start, end
+    matches: Vec<(String, u32, u32)>,
     array_identifier: String,
     item: String,
     pos: String,
@@ -44,8 +45,8 @@ impl Rule for Duplicates {
         let mut duplicates: Duplicates = Duplicates::default();
         duplicates.visit_program(&program);
 
-        for (_function_name, start, _end) in &duplicates.function_name_spans {
-            let (line, column) = line_column(input, *start);
+        for (_function_name, start, _end) in &duplicates.matches {
+            let (line, column) = Duplicates::line_column(input, *start);
             let classification = "bad method".to_string();
             let description = self.get_description().to_string();
             let line_result = LineResult {
@@ -194,7 +195,7 @@ impl Duplicates {
                     && self.has_valid_param(call_expression)
                 {
                     // handle indexOf method call
-                    self.function_name_spans.push((
+                    self.matches.push((
                         String::from("pattern found"),
                         call_expression.callee.span().start,
                         call_expression.callee.span().end,
@@ -221,6 +222,24 @@ impl Duplicates {
         } else {
             false
         }
+    }
+
+    /// Get the line and column of a given start position in the given input string
+    fn line_column(input: &str, start: u32) -> (i32, i32) {
+        let mut line = 1;
+        let mut column = 0;
+        for (i, c) in input.chars().enumerate() {
+            if i as u32 == start {
+                break;
+            }
+            if c == '\n' {
+                line += 1;
+                column = 1;
+            } else {
+                column += 1;
+            }
+        }
+        (line, column)
     }
 
     /// Extract the binding identifiers from the function expression for item and pos for later matching
@@ -287,24 +306,6 @@ fn is_filter_method(call_expression: &oxc::ast::ast::CallExpression<'_>) -> bool
         }
     }
     false
-}
-
-/// Get the line and column of a given start position in the given input string
-fn line_column(input: &str, start: u32) -> (i32, i32) {
-    let mut line = 1;
-    let mut column = 0;
-    for (i, c) in input.chars().enumerate() {
-        if i as u32 == start {
-            break;
-        }
-        if c == '\n' {
-            line += 1;
-            column = 1;
-        } else {
-            column += 1;
-        }
-    }
-    (line, column)
 }
 
 /// Check if the arrow function expression has the correct number of parameters and is a non empty return statement
@@ -391,14 +392,14 @@ mod tests {
         let program = ret.program;
 
         let mut ast_pass = Duplicates {
-            function_name_spans: vec![],
+            matches: vec![],
             array_identifier: String::from(""),
             item: String::from(""),
             pos: String::from(""),
         };
         ast_pass.visit_program(&program);
-        assert_eq!(ast_pass.function_name_spans.len(), 1);
-        assert_eq!(ast_pass.function_name_spans[0].0, "pattern found");
+        assert_eq!(ast_pass.matches.len(), 1);
+        assert_eq!(ast_pass.matches[0].0, "pattern found");
     }
 
     #[test]
@@ -411,14 +412,14 @@ mod tests {
         let program = ret.program;
 
         let mut ast_pass = Duplicates {
-            function_name_spans: vec![],
+            matches: vec![],
             array_identifier: String::from(""),
             item: String::from(""),
             pos: String::from(""),
         };
         ast_pass.visit_program(&program);
-        assert_eq!(ast_pass.function_name_spans.len(), 1);
-        assert_eq!(ast_pass.function_name_spans[0].0, "pattern found");
+        assert_eq!(ast_pass.matches.len(), 1);
+        assert_eq!(ast_pass.matches[0].0, "pattern found");
     }
 
     #[test]
@@ -431,14 +432,14 @@ mod tests {
         let program = ret.program;
 
         let mut ast_pass = Duplicates {
-            function_name_spans: vec![],
+            matches: vec![],
             array_identifier: String::from(""),
             item: String::from(""),
             pos: String::from(""),
         };
         ast_pass.visit_program(&program);
-        assert_eq!(ast_pass.function_name_spans.len(), 1);
-        assert_eq!(ast_pass.function_name_spans[0].0, "pattern found");
+        assert_eq!(ast_pass.matches.len(), 1);
+        assert_eq!(ast_pass.matches[0].0, "pattern found");
     }
 
     #[test]
@@ -451,14 +452,14 @@ mod tests {
         let program = ret.program;
 
         let mut ast_pass = Duplicates {
-            function_name_spans: vec![],
+            matches: vec![],
             array_identifier: String::from(""),
             item: String::from(""),
             pos: String::from(""),
         };
         ast_pass.visit_program(&program);
-        assert_eq!(ast_pass.function_name_spans.len(), 1);
-        assert_eq!(ast_pass.function_name_spans[0].0, "pattern found");
+        assert_eq!(ast_pass.matches.len(), 1);
+        assert_eq!(ast_pass.matches[0].0, "pattern found");
     }
 
     #[test]
@@ -471,14 +472,14 @@ mod tests {
         let program = ret.program;
 
         let mut ast_pass = Duplicates {
-            function_name_spans: vec![],
+            matches: vec![],
             array_identifier: String::from(""),
             item: String::from(""),
             pos: String::from(""),
         };
         ast_pass.visit_program(&program);
-        assert_eq!(ast_pass.function_name_spans.len(), 1);
-        assert_eq!(ast_pass.function_name_spans[0].0, "pattern found");
+        assert_eq!(ast_pass.matches.len(), 1);
+        assert_eq!(ast_pass.matches[0].0, "pattern found");
     }
 
     #[test]
@@ -491,14 +492,14 @@ mod tests {
         let program = ret.program;
 
         let mut ast_pass = Duplicates {
-            function_name_spans: vec![],
+            matches: vec![],
             array_identifier: String::from(""),
             item: String::from(""),
             pos: String::from(""),
         };
         ast_pass.visit_program(&program);
-        assert_eq!(ast_pass.function_name_spans.len(), 1);
-        assert_eq!(ast_pass.function_name_spans[0].0, "pattern found");
+        assert_eq!(ast_pass.matches.len(), 1);
+        assert_eq!(ast_pass.matches[0].0, "pattern found");
     }
 
     #[test]
@@ -511,14 +512,14 @@ mod tests {
         let program = ret.program;
 
         let mut ast_pass = Duplicates {
-            function_name_spans: vec![],
+            matches: vec![],
             array_identifier: String::from(""),
             item: String::from(""),
             pos: String::from(""),
         };
         ast_pass.visit_program(&program);
-        assert_eq!(ast_pass.function_name_spans.len(), 1);
-        assert_eq!(ast_pass.function_name_spans[0].0, "pattern found");
+        assert_eq!(ast_pass.matches.len(), 1);
+        assert_eq!(ast_pass.matches[0].0, "pattern found");
     }
 
     #[test]
@@ -531,14 +532,14 @@ mod tests {
         let program = ret.program;
 
         let mut ast_pass = Duplicates {
-            function_name_spans: vec![],
+            matches: vec![],
             array_identifier: String::from(""),
             item: String::from(""),
             pos: String::from(""),
         };
         ast_pass.visit_program(&program);
-        assert_eq!(ast_pass.function_name_spans.len(), 1);
-        assert_eq!(ast_pass.function_name_spans[0].0, "pattern found");
+        assert_eq!(ast_pass.matches.len(), 1);
+        assert_eq!(ast_pass.matches[0].0, "pattern found");
     }
 
     #[test]
@@ -551,14 +552,14 @@ mod tests {
         let program = ret.program;
 
         let mut ast_pass = Duplicates {
-            function_name_spans: vec![],
+            matches: vec![],
             array_identifier: String::from(""),
             item: String::from(""),
             pos: String::from(""),
         };
         ast_pass.visit_program(&program);
-        assert_eq!(ast_pass.function_name_spans.len(), 1);
-        assert_eq!(ast_pass.function_name_spans[0].0, "pattern found");
+        assert_eq!(ast_pass.matches.len(), 1);
+        assert_eq!(ast_pass.matches[0].0, "pattern found");
     }
 
     #[test]
@@ -571,14 +572,14 @@ mod tests {
         let program = ret.program;
 
         let mut ast_pass = Duplicates {
-            function_name_spans: vec![],
+            matches: vec![],
             array_identifier: String::from(""),
             item: String::from(""),
             pos: String::from(""),
         };
         ast_pass.visit_program(&program);
-        assert_eq!(ast_pass.function_name_spans.len(), 1);
-        assert_eq!(ast_pass.function_name_spans[0].0, "pattern found");
+        assert_eq!(ast_pass.matches.len(), 1);
+        assert_eq!(ast_pass.matches[0].0, "pattern found");
     }
 
     #[test]
@@ -591,14 +592,14 @@ mod tests {
         let program = ret.program;
 
         let mut ast_pass = Duplicates {
-            function_name_spans: vec![],
+            matches: vec![],
             array_identifier: String::from(""),
             item: String::from(""),
             pos: String::from(""),
         };
         ast_pass.visit_program(&program);
-        assert_eq!(ast_pass.function_name_spans.len(), 1);
-        assert_eq!(ast_pass.function_name_spans[0].0, "pattern found");
+        assert_eq!(ast_pass.matches.len(), 1);
+        assert_eq!(ast_pass.matches[0].0, "pattern found");
     }
 
     #[test]
@@ -611,14 +612,14 @@ mod tests {
         let program = ret.program;
 
         let mut ast_pass = Duplicates {
-            function_name_spans: vec![],
+            matches: vec![],
             array_identifier: String::from(""),
             item: String::from(""),
             pos: String::from(""),
         };
         ast_pass.visit_program(&program);
-        assert_eq!(ast_pass.function_name_spans.len(), 1);
-        assert_eq!(ast_pass.function_name_spans[0].0, "pattern found");
+        assert_eq!(ast_pass.matches.len(), 1);
+        assert_eq!(ast_pass.matches[0].0, "pattern found");
     }
 
     #[test]
@@ -631,14 +632,14 @@ mod tests {
         let program = ret.program;
 
         let mut ast_pass = Duplicates {
-            function_name_spans: vec![],
+            matches: vec![],
             array_identifier: String::from(""),
             item: String::from(""),
             pos: String::from(""),
         };
         ast_pass.visit_program(&program);
-        assert_eq!(ast_pass.function_name_spans.len(), 1);
-        assert_eq!(ast_pass.function_name_spans[0].0, "pattern found");
+        assert_eq!(ast_pass.matches.len(), 1);
+        assert_eq!(ast_pass.matches[0].0, "pattern found");
     }
 
     #[test]
@@ -651,14 +652,14 @@ mod tests {
         let program = ret.program;
 
         let mut ast_pass = Duplicates {
-            function_name_spans: vec![],
+            matches: vec![],
             array_identifier: String::from(""),
             item: String::from(""),
             pos: String::from(""),
         };
         ast_pass.visit_program(&program);
-        assert_eq!(ast_pass.function_name_spans.len(), 1);
-        assert_eq!(ast_pass.function_name_spans[0].0, "pattern found");
+        assert_eq!(ast_pass.matches.len(), 1);
+        assert_eq!(ast_pass.matches[0].0, "pattern found");
     }
 
     #[test]
@@ -671,14 +672,14 @@ mod tests {
         let program = ret.program;
 
         let mut ast_pass = Duplicates {
-            function_name_spans: vec![],
+            matches: vec![],
             array_identifier: String::from(""),
             item: String::from(""),
             pos: String::from(""),
         };
         ast_pass.visit_program(&program);
-        assert_eq!(ast_pass.function_name_spans.len(), 1);
-        assert_eq!(ast_pass.function_name_spans[0].0, "pattern found");
+        assert_eq!(ast_pass.matches.len(), 1);
+        assert_eq!(ast_pass.matches[0].0, "pattern found");
     }
 
     #[test]
@@ -691,14 +692,14 @@ mod tests {
         let program = ret.program;
 
         let mut ast_pass = Duplicates {
-            function_name_spans: vec![],
+            matches: vec![],
             array_identifier: String::from(""),
             item: String::from(""),
             pos: String::from(""),
         };
         ast_pass.visit_program(&program);
-        assert_eq!(ast_pass.function_name_spans.len(), 1);
-        assert_eq!(ast_pass.function_name_spans[0].0, "pattern found");
+        assert_eq!(ast_pass.matches.len(), 1);
+        assert_eq!(ast_pass.matches[0].0, "pattern found");
     }
 
     #[test]
@@ -712,14 +713,14 @@ mod tests {
         let program = ret.program;
 
         let mut ast_pass = Duplicates {
-            function_name_spans: vec![],
+            matches: vec![],
             array_identifier: String::from(""),
             item: String::from(""),
             pos: String::from(""),
         };
         ast_pass.visit_program(&program);
-        assert_eq!(ast_pass.function_name_spans.len(), 1);
-        assert_eq!(ast_pass.function_name_spans[0].0, "pattern found");
+        assert_eq!(ast_pass.matches.len(), 1);
+        assert_eq!(ast_pass.matches[0].0, "pattern found");
     }
 
     #[test]
@@ -733,14 +734,14 @@ mod tests {
         let program = ret.program;
 
         let mut ast_pass = Duplicates {
-            function_name_spans: vec![],
+            matches: vec![],
             array_identifier: String::from(""),
             item: String::from(""),
             pos: String::from(""),
         };
         ast_pass.visit_program(&program);
-        assert_eq!(ast_pass.function_name_spans.len(), 1);
-        assert_eq!(ast_pass.function_name_spans[0].0, "pattern found");
+        assert_eq!(ast_pass.matches.len(), 1);
+        assert_eq!(ast_pass.matches[0].0, "pattern found");
     }
 
     #[test]
@@ -753,15 +754,15 @@ mod tests {
         let ret = Parser::new(&allocator, source_text, source_type).parse();
         let program = ret.program;
         let mut ast_pass = Duplicates {
-            function_name_spans: vec![],
+            matches: vec![],
             array_identifier: String::from(""),
             item: String::from(""),
             pos: String::from(""),
         };
 
         ast_pass.visit_program(&program);
-        assert_eq!(ast_pass.function_name_spans.len(), 1);
-        assert_eq!(ast_pass.function_name_spans[0].0, "pattern found");
+        assert_eq!(ast_pass.matches.len(), 1);
+        assert_eq!(ast_pass.matches[0].0, "pattern found");
     }
 
     #[test]
@@ -774,15 +775,15 @@ mod tests {
         let ret = Parser::new(&allocator, source_text, source_type).parse();
         let program = ret.program;
         let mut ast_pass = Duplicates {
-            function_name_spans: vec![],
+            matches: vec![],
             array_identifier: String::from(""),
             item: String::from(""),
             pos: String::from(""),
         };
 
         ast_pass.visit_program(&program);
-        assert_eq!(ast_pass.function_name_spans.len(), 1);
-        assert_eq!(ast_pass.function_name_spans[0].0, "pattern found");
+        assert_eq!(ast_pass.matches.len(), 1);
+        assert_eq!(ast_pass.matches[0].0, "pattern found");
     }
 
     #[test]
@@ -795,15 +796,15 @@ mod tests {
         let ret = Parser::new(&allocator, source_text, source_type).parse();
         let program = ret.program;
         let mut ast_pass = Duplicates {
-            function_name_spans: vec![],
+            matches: vec![],
             array_identifier: String::from(""),
             item: String::from(""),
             pos: String::from(""),
         };
 
         ast_pass.visit_program(&program);
-        assert_eq!(ast_pass.function_name_spans.len(), 1);
-        assert_eq!(ast_pass.function_name_spans[0].0, "pattern found");
+        assert_eq!(ast_pass.matches.len(), 1);
+        assert_eq!(ast_pass.matches[0].0, "pattern found");
     }
 
     #[test]
@@ -816,15 +817,15 @@ mod tests {
         let ret = Parser::new(&allocator, source_text, source_type).parse();
         let program = ret.program;
         let mut ast_pass = Duplicates {
-            function_name_spans: vec![],
+            matches: vec![],
             array_identifier: String::from(""),
             item: String::from(""),
             pos: String::from(""),
         };
 
         ast_pass.visit_program(&program);
-        assert_eq!(ast_pass.function_name_spans.len(), 1);
-        assert_eq!(ast_pass.function_name_spans[0].0, "pattern found");
+        assert_eq!(ast_pass.matches.len(), 1);
+        assert_eq!(ast_pass.matches[0].0, "pattern found");
     }
 
     #[test]
@@ -837,15 +838,15 @@ mod tests {
         let ret = Parser::new(&allocator, source_text, source_type).parse();
         let program = ret.program;
         let mut ast_pass = Duplicates {
-            function_name_spans: vec![],
+            matches: vec![],
             array_identifier: String::from(""),
             item: String::from(""),
             pos: String::from(""),
         };
 
         ast_pass.visit_program(&program);
-        assert_eq!(ast_pass.function_name_spans.len(), 1);
-        assert_eq!(ast_pass.function_name_spans[0].0, "pattern found");
+        assert_eq!(ast_pass.matches.len(), 1);
+        assert_eq!(ast_pass.matches[0].0, "pattern found");
     }
 
     #[test]
@@ -858,15 +859,15 @@ mod tests {
         let ret = Parser::new(&allocator, source_text, source_type).parse();
         let program = ret.program;
         let mut ast_pass = Duplicates {
-            function_name_spans: vec![],
+            matches: vec![],
             array_identifier: String::from(""),
             item: String::from(""),
             pos: String::from(""),
         };
 
         ast_pass.visit_program(&program);
-        assert_eq!(ast_pass.function_name_spans.len(), 1);
-        assert_eq!(ast_pass.function_name_spans[0].0, "pattern found");
+        assert_eq!(ast_pass.matches.len(), 1);
+        assert_eq!(ast_pass.matches[0].0, "pattern found");
     }
     // empty parameters
     #[test]
@@ -879,13 +880,13 @@ mod tests {
         let program = ret.program;
 
         let mut ast_pass = Duplicates {
-            function_name_spans: vec![],
+            matches: vec![],
             array_identifier: String::from(""),
             item: String::from(""),
             pos: String::from(""),
         };
         ast_pass.visit_program(&program);
-        assert_eq!(ast_pass.function_name_spans.len(), 0);
+        assert_eq!(ast_pass.matches.len(), 0);
     }
 
     #[test]
@@ -897,14 +898,14 @@ mod tests {
         let ret = Parser::new(&allocator, source_text, source_type).parse();
         let program = ret.program;
         let mut ast_pass = Duplicates {
-            function_name_spans: vec![],
+            matches: vec![],
             array_identifier: String::from(""),
             item: String::from(""),
             pos: String::from(""),
         };
 
         ast_pass.visit_program(&program);
-        assert_eq!(ast_pass.function_name_spans.len(), 0);
+        assert_eq!(ast_pass.matches.len(), 0);
     }
 
     // empty body
@@ -917,13 +918,13 @@ mod tests {
         let program = ret.program;
 
         let mut ast_pass = Duplicates {
-            function_name_spans: vec![],
+            matches: vec![],
             array_identifier: String::from(""),
             item: String::from(""),
             pos: String::from(""),
         };
         ast_pass.visit_program(&program);
-        assert_eq!(ast_pass.function_name_spans.len(), 0);
+        assert_eq!(ast_pass.matches.len(), 0);
     }
 
     // empty body
@@ -936,13 +937,13 @@ mod tests {
         let program = ret.program;
 
         let mut ast_pass = Duplicates {
-            function_name_spans: vec![],
+            matches: vec![],
             array_identifier: String::from(""),
             item: String::from(""),
             pos: String::from(""),
         };
         ast_pass.visit_program(&program);
-        assert_eq!(ast_pass.function_name_spans.len(), 0);
+        assert_eq!(ast_pass.matches.len(), 0);
     }
 
     // empty indexOf method call
@@ -956,13 +957,13 @@ mod tests {
         let program = ret.program;
 
         let mut ast_pass = Duplicates {
-            function_name_spans: vec![],
+            matches: vec![],
             array_identifier: String::from(""),
             item: String::from(""),
             pos: String::from(""),
         };
         ast_pass.visit_program(&program);
-        assert_eq!(ast_pass.function_name_spans.len(), 0);
+        assert_eq!(ast_pass.matches.len(), 0);
     }
 }
 // endregion: tests

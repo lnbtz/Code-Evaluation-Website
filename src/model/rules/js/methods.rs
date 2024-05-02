@@ -107,7 +107,7 @@ fn line_column(input: &str, start: u32) -> (i32, i32) {
 }
 
 mod tests {
-
+    use super::*;
     #[test]
     fn test_visit_program_arrow_two_params_strict_equality_regular() {
         let allocator = Allocator::default();
