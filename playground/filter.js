@@ -25,6 +25,7 @@ let uniqueArray20 = array.filter((item, index, self) => {return self.indexOf(ite
 let uniqueArray21 = array.filter((item, index, self) => {return index === self.indexOf(item);});
 let uniqueArray22 = array.filter((item, index, self) => {return self.indexOf(item) == index;});
 let uniqueArray23 = array.filter((item, index, self) => {return index == self.indexOf(item);});
+
 let uniqueArray24 = array.filter(() => {});
 let uniqueArray100 = array.filter(function(item, index, self) {} );
 let uniqueArray110 = array.filter(function() { });

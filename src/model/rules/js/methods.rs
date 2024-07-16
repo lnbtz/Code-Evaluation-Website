@@ -1,7 +1,8 @@
 use crate::model::rules::LineResult;
 
 use oxc::allocator::Allocator;
-use oxc::ast::{AstKind, Visit};
+use oxc::ast::visit::walk::walk_call_expression;
+use oxc::ast::Visit;
 use oxc::parser::Parser;
 use oxc::span::{GetSpan, SourceType};
 
@@ -60,32 +61,24 @@ impl Rule for Methods {
 }
 
 impl<'a> Visit<'a> for Methods {
-    fn enter_node(&mut self, kind: AstKind<'a>) {
-        if let AstKind::CallExpression(call_expression) = kind {
-            let method_name = if call_expression.callee.is_identifier_reference() {
-                call_expression
-                    .callee
-                    .get_identifier_reference()
-                    .unwrap()
-                    .name
-                    .to_string()
-            } else {
-                call_expression
-                    .callee
-                    .get_member_expr()
-                    .unwrap()
-                    .static_property_name()
-                    .unwrap()
-                    .to_string()
-            };
-            if self.methods.contains(&method_name) {
+    fn visit_call_expression(&mut self, expr: &oxc::ast::ast::CallExpression<'a>) {
+        let method_name = &expr
+            .callee
+            .get_inner_expression()
+            .get_member_expr()
+            .unwrap()
+            .static_property_name();
+        if let Some(method_name) = method_name {
+            println!("method_name: {}", method_name);
+            if self.methods.contains(&method_name.to_string()) {
                 self.function_name_spans.push((
-                    method_name,
-                    call_expression.callee.span().start,
-                    call_expression.callee.span().end,
-                ))
+                    method_name.to_string(),
+                    expr.callee.span().start,
+                    expr.callee.span().end,
+                ));
             };
         }
+        walk_call_expression(self, expr);
     }
 }
 
@@ -109,7 +102,7 @@ fn line_column(input: &str, start: u32) -> (i32, i32) {
 mod tests {
     use super::*;
     #[test]
-    fn test_visit_program_arrow_two_params_strict_equality_regular() {
+    fn test_find_methods() {
         let allocator = Allocator::default();
         let source_text =
             "let uniqueArray = array.filter((item, index) => array.indexOf(item) === index);";
@@ -119,10 +112,11 @@ mod tests {
 
         let mut method_finder = Methods {
             function_name_spans: vec![],
-            methods: vec![String::from("indexOf")],
+            methods: vec![String::from("filter"), String::from("indexOf")],
         };
         method_finder.visit_program(&program);
-        assert_eq!(method_finder.function_name_spans.len(), 1);
-        assert_eq!(method_finder.function_name_spans[0].0, "indexOf");
+        assert_eq!(method_finder.function_name_spans.len(), 2);
+        assert_eq!(method_finder.function_name_spans[0].0, "filter");
+        assert_eq!(method_finder.function_name_spans[1].0, "indexOf");
     }
 }

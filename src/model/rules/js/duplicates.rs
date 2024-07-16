@@ -2,22 +2,24 @@ use crate::model::rules::LineResult;
 
 use oxc::allocator::Allocator;
 
-use oxc::ast::ast::Argument::Expression;
 use oxc::ast::ast::BindingPatternKind::BindingIdentifier;
 use oxc::ast::ast::Expression::ArrowFunctionExpression;
 use oxc::ast::ast::Expression::BinaryExpression;
 use oxc::ast::ast::Expression::CallExpression;
 use oxc::ast::ast::Expression::FunctionExpression;
+use oxc::ast::ast::Expression::Identifier;
 
 use oxc::ast::ast::Statement::ExpressionStatement;
 use oxc::ast::ast::Statement::ReturnStatement;
-use oxc::ast::{AstKind, Visit};
+use oxc::ast::visit::walk::walk_call_expression;
+use oxc::ast::Visit;
 use oxc::parser::Parser;
 use oxc::span::{GetSpan, SourceType};
 use oxc::syntax::operator::BinaryOperator::Equality;
 use oxc::syntax::operator::BinaryOperator::StrictEquality;
 
 use super::Rule;
+/// This struct is used to find filter method calls that remove duplicates from an array
 #[derive(Debug, Default)]
 pub struct Duplicates {
     /// function name, start, end
@@ -37,6 +39,7 @@ impl Rule for Duplicates {
     }
     fn apply(&self, input: &str) -> Option<std::vec::Vec<LineResult>> {
         let mut result = vec![];
+        // boiler plate code to parse the input string
         let allocator = Allocator::default();
         let source_text = input;
         let source_type = SourceType::from_path("javscript.js").unwrap();
@@ -45,6 +48,7 @@ impl Rule for Duplicates {
         let mut duplicates: Duplicates = Duplicates::default();
         duplicates.visit_program(&program);
 
+        // iterate over the matches and create LineResult objects
         for (_function_name, start, _end) in &duplicates.matches {
             let (line, column) = Duplicates::line_column(input, *start);
             let classification = "bad method".to_string();
@@ -62,34 +66,49 @@ impl Rule for Duplicates {
     }
 }
 
-/// This struct is used to find filter method calls that remove duplicates from an array
 impl<'a> Visit<'a> for Duplicates {
     // entrypoint for the visitor pattern
-    fn enter_node(&mut self, kind: AstKind<'a>) {
-        // match method calls 'CallExpression'
-        if let AstKind::CallExpression(call_expression) = kind {
-            // match 'filter' method call
-            if is_filter_method(call_expression) {
-                self.array_identifier =
-                    get_function_target_identifier_name(call_expression).to_string();
-                // match 'filter' call arguments and check for expression
-                if let Expression(function_expression) = &call_expression.arguments[0] {
-                    match &function_expression.get_inner_expression() {
-                        // match arrow function expression
-                        ArrowFunctionExpression(arrow_function_expression) => {
-                            // handle arrow function expression
-                            self.handle_arrow_function_expression(arrow_function_expression);
-                        }
-                        // match function expression
-                        FunctionExpression(function_expression) => {
-                            // handle function expression
-                            self.handle_function_expression(function_expression);
-                        }
-                        _ => {}
-                    }
-                };
-            }
+    fn visit_call_expression(&mut self, expr: &oxc::ast::ast::CallExpression<'a>) {
+        // extract the method name, array identifier and arguments from the call expression
+        let (method_name, array_identifier, arguments) = {
+            (
+                &expr
+                    .callee
+                    .get_inner_expression()
+                    .get_member_expr()
+                    .unwrap()
+                    .static_property_name(),
+                &expr
+                    .callee
+                    .get_inner_expression()
+                    .get_member_expr()
+                    .unwrap()
+                    .object()
+                    .get_identifier_reference()
+                    .unwrap()
+                    .name,
+                &expr.arguments,
+            )
+        };
+        // check if the method name is filter and the number of arguments is 1
+        if method_name.unwrap_or("not filter") == "filter" && arguments.len() == 1 {
+            self.array_identifier = array_identifier.to_string();
+
+            match &arguments[0].to_expression() {
+                // match arrow function expression
+                ArrowFunctionExpression(arrow_function_expression) => {
+                    // handle arrow function expression
+                    self.handle_arrow_function_expression(arrow_function_expression);
+                }
+                // match function expression
+                FunctionExpression(function_expression) => {
+                    // handle function expression
+                    self.handle_function_expression(function_expression);
+                }
+                _ => {}
+            };
         }
+        walk_call_expression(self, expr);
     }
 }
 
@@ -213,15 +232,10 @@ impl Duplicates {
         &mut self,
         call_expression: &oxc::allocator::Box<'a, oxc::ast::ast::CallExpression<'a>>,
     ) -> bool {
-        if let Expression(item) = &call_expression.arguments[0] {
-            if let Some(item) = item.get_identifier_reference() {
-                item.name == self.item
-            } else {
-                false
-            }
-        } else {
-            false
+        if let Identifier(identifier) = call_expression.arguments[0].to_expression() {
+            return identifier.name == self.item;
         }
+        false
     }
 
     /// Get the line and column of a given start position in the given input string
@@ -296,16 +310,6 @@ fn get_function_target_identifier_name<'a>(
         .get_identifier_reference()
         .unwrap()
         .name
-}
-
-/// Check if the call expression is a filter method call with one argument
-fn is_filter_method(call_expression: &oxc::ast::ast::CallExpression<'_>) -> bool {
-    if let Some(callee) = call_expression.callee.get_member_expr() {
-        if let Some(static_property_name) = callee.static_property_name() {
-            return static_property_name == "filter" && call_expression.arguments.len() == 1;
-        }
-    }
-    false
 }
 
 /// Check if the arrow function expression has the correct number of parameters and is a non empty return statement
@@ -964,6 +968,54 @@ mod tests {
         };
         ast_pass.visit_program(&program);
         assert_eq!(ast_pass.matches.len(), 0);
+    }
+
+    // empty indexOf method call
+    #[test]
+    fn test_all_cases_at_once() {
+        let allocator = Allocator::default();
+        let source_text =
+                "let uniqueArray = array.filter((item, index) => array.indexOf(item) === index);
+                let uniqueArray1 = array.filter(function(item, pos) { return array.indexOf(item) === pos });
+                let uniqueArray2 = array.filter(function(item, pos, self) { return self.indexOf(item) === pos });
+                let uniqueArray3 = array.filter((item, index, self) => self.indexOf(item) === index);
+                let uniqueArray4 = array.filter((item, index) => index === array.indexOf(item));
+                let uniqueArray5 = array.filter(function(item, pos) { return pos === array.indexOf(item) });
+                let uniqueArray6 = array.filter(function(item, pos, self) { return pos === self.indexOf(item) });
+                let uniqueArray7 = array.filter((item, index, self) => index === self.indexOf(item));
+                let uniqueArray8 = array.filter((item, index) => array.indexOf(item) == index);
+                let uniqueArray9 = array.filter(function(item, pos) { return array.indexOf(item) == pos });
+                let uniqueArray10 = array.filter(function(item, pos, self) { return self.indexOf(item) == pos });
+                let uniqueArray11 = array.filter((item, index, self) => self.indexOf(item) == index);
+                let uniqueArray12 = array.filter((item, index) => index == array.indexOf(item));
+                let uniqueArray13 = array.filter(function(item, pos) { return pos == array.indexOf(item) });
+                let uniqueArray14 = array.filter(function(item, pos, self) { return pos == self.indexOf(item) });
+                let uniqueArray15 = array.filter((item, index, self) => index == self.indexOf(item));
+                let uniqueArray16 = array.filter((item, index) => {return array.indexOf(item) === index;});
+                let uniqueArray17 = array.filter((item, index) => {return index === array.indexOf(item);});
+                let uniqueArray18 = array.filter((item, index) => {return array.indexOf(item) == index;});
+                let uniqueArray19 = array.filter((item, index) => {return index == array.indexOf(item);});
+                let uniqueArray20 = array.filter((item, index, self) => {return self.indexOf(item) === index;});
+                let uniqueArray21 = array.filter((item, index, self) => {return index === self.indexOf(item);});
+                let uniqueArray22 = array.filter((item, index, self) => {return self.indexOf(item) == index;});
+                let uniqueArray23 = array.filter((item, index, self) => {return index == self.indexOf(item);});
+                let uniqueArray24 = array.filter(() => {});
+                let uniqueArray100 = array.filter(function(item, index, self) {} );
+                let uniqueArray110 = array.filter(function() { });
+                let uniqueArray230 = array.filter((item, index, self) => {return index == self.indexOf(self);});
+                let uniqueArray150 = array.filter((item, index, self) => self.indexOf() === index);";
+        let source_type = SourceType::from_path("javscript.js").unwrap();
+        let ret = Parser::new(&allocator, source_text, source_type).parse();
+        let program = ret.program;
+
+        let mut ast_pass = Duplicates {
+            matches: vec![],
+            array_identifier: String::from(""),
+            item: String::from(""),
+            pos: String::from(""),
+        };
+        ast_pass.visit_program(&program);
+        assert_eq!(ast_pass.matches.len(), 24);
     }
 }
 // endregion: tests
