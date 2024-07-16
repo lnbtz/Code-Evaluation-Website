@@ -31,6 +31,7 @@ let uniqueArray100 = array.filter(function(item, index, self) {} );
 let uniqueArray110 = array.filter(function() { });
 let uniqueArray230 = array.filter((item, index, self) => {return index == self.indexOf(self);});
 let uniqueArray150 = array.filter((item, index, self) => self.indexOf() === index);
+let uniqueArray250 = array.filter((item, index, self) => self.indexOf(item, startingIndex) === index);
 console.log(uniqueArray.length === 10);
 console.log(uniqueArray1.length === 10);
 console.log(uniqueArray2.length === 10);

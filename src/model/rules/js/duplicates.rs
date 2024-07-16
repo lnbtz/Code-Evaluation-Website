@@ -90,24 +90,24 @@ impl<'a> Visit<'a> for Duplicates {
                 &expr.arguments,
             )
         };
-        // check if the method name is filter and the number of arguments is 1
+        // check if the method name is 'filter' and has the correct number of arguments
         if method_name.unwrap_or("not filter") == "filter" && arguments.len() == 1 {
+            // assign the array identifier for later matching
             self.array_identifier = array_identifier.to_string();
-
+            // match whether it is a function expression  call or an arrow function expression call
             match &arguments[0].to_expression() {
-                // match arrow function expression
+                // handle arrow function expression
                 ArrowFunctionExpression(arrow_function_expression) => {
-                    // handle arrow function expression
                     self.handle_arrow_function_expression(arrow_function_expression);
                 }
-                // match function expression
+                // handle function expression
                 FunctionExpression(function_expression) => {
-                    // handle function expression
                     self.handle_function_expression(function_expression);
                 }
                 _ => {}
             };
         }
+        // continue walking the AST
         walk_call_expression(self, expr);
     }
 }
@@ -233,7 +233,7 @@ impl Duplicates {
         call_expression: &oxc::allocator::Box<'a, oxc::ast::ast::CallExpression<'a>>,
     ) -> bool {
         if let Identifier(identifier) = call_expression.arguments[0].to_expression() {
-            return identifier.name == self.item;
+            return identifier.name == self.item && call_expression.arguments.len() == 1;
         }
         false
     }
@@ -970,7 +970,27 @@ mod tests {
         assert_eq!(ast_pass.matches.len(), 0);
     }
 
-    // empty indexOf method call
+    // two params indexOf method call
+    #[test]
+    fn test_visit_program_two_params_indexof_method_call() {
+        let allocator = Allocator::default();
+        let source_text =
+            "let uniqueArray15 = array.filter((item, index, self) => self.indexOf(item, startingIndex) === index);";
+        let source_type = SourceType::from_path("javscript.js").unwrap();
+        let ret = Parser::new(&allocator, source_text, source_type).parse();
+        let program = ret.program;
+        let mut ast_pass = Duplicates {
+            matches: vec![],
+            array_identifier: String::from(""),
+            item: String::from(""),
+            pos: String::from(""),
+        };
+
+        ast_pass.visit_program(&program);
+        assert_eq!(ast_pass.matches.len(), 0);
+    }
+
+    // all tests at once
     #[test]
     fn test_all_cases_at_once() {
         let allocator = Allocator::default();
@@ -1003,7 +1023,8 @@ mod tests {
                 let uniqueArray100 = array.filter(function(item, index, self) {} );
                 let uniqueArray110 = array.filter(function() { });
                 let uniqueArray230 = array.filter((item, index, self) => {return index == self.indexOf(self);});
-                let uniqueArray150 = array.filter((item, index, self) => self.indexOf() === index);";
+                let uniqueArray150 = array.filter((item, index, self) => self.indexOf() === index);
+                let uniqueArray250 = array.filter((item, index, self) => self.indexOf(item, startingIndex) === index);";
         let source_type = SourceType::from_path("javscript.js").unwrap();
         let ret = Parser::new(&allocator, source_text, source_type).parse();
         let program = ret.program;
