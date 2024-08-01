@@ -69,7 +69,6 @@ impl<'a> Visit<'a> for Methods {
             .unwrap()
             .static_property_name();
         if let Some(method_name) = method_name {
-            println!("method_name: {}", method_name);
             if self.methods.contains(&method_name.to_string()) {
                 self.function_name_spans.push((
                     method_name.to_string(),

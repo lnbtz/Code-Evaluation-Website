@@ -19,7 +19,7 @@ use oxc::syntax::operator::BinaryOperator::Equality;
 use oxc::syntax::operator::BinaryOperator::StrictEquality;
 
 use super::Rule;
-/// This struct is used to find filter method calls that remove duplicates from an array
+/// This rule is used to find filter method calls that remove duplicates from an array
 #[derive(Debug, Default)]
 pub struct Duplicates {
     /// function name, start, end
