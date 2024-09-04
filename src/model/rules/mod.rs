@@ -37,74 +37,47 @@ impl std::fmt::Display for Severity {
 }
 
 /// load_rules loads the rules based on the file type and the rules to load
+/// if new programming langueages are added, they should be added here as a new match case
+/// with the corresponding load function
 pub fn load_rules(file_type: String, rules_to_load: Vec<String>) -> Vec<Box<dyn Rule>> {
     match file_type.as_str() {
         "css" => load_css_rules(rules_to_load),
         "html" => load_html_rules(rules_to_load),
         "js" => load_js_rules(rules_to_load),
-        "java" => load_java_rules(rules_to_load),
         _ => panic!("Unknown file type: {}", file_type),
     }
 }
 
 /// load_css_rules loads the css rules based on the rules to load
+/// new rules have to be added to the match case
 pub fn load_css_rules(rules_to_load: Vec<String>) -> Vec<Box<dyn Rule>> {
-    if rules_to_load.is_empty() {
-        return vec![Box::new(Minify) as Box<dyn Rule>];
-    }
-    rules_to_load
-        .iter()
-        .map(|rule| match rule.as_str() {
-            "css-minify" => Box::new(Minify) as Box<dyn Rule>,
-            _ => panic!("Unknown rule: {}", rule),
-        })
-        .collect()
+    let rules = vec![Box::new(Minify) as Box<dyn Rule>];
+    filter_rules(rules_to_load, rules)
 }
 
 /// load_html_rules loads the html rules based on the rules to load
+/// new rules have to be added to the match case
 pub fn load_html_rules(rules_to_load: Vec<String>) -> Vec<Box<dyn Rule>> {
-    if rules_to_load.is_empty() {
-        return vec![Box::new(html::loading::Loading) as Box<dyn Rule>];
-    }
-    rules_to_load
-        .iter()
-        .map(|rule| match rule.as_str() {
-            "lazy-loading" => Box::new(html::loading::Loading) as Box<dyn Rule>,
-            _ => panic!("Unknown rule: {}", rule),
-        })
-        .collect()
+    let rules = vec![Box::new(html::loading::Loading) as Box<dyn Rule>];
+    filter_rules(rules_to_load, rules)
 }
 
 /// load_js_rules loads the js rules based on the rules to load
+/// new rules have to be added to the match case
 pub fn load_js_rules(rules_to_load: Vec<String>) -> Vec<Box<dyn Rule>> {
-    if rules_to_load.is_empty() {
-        return vec![
-            Box::new(js::minify::Minify) as Box<dyn Rule>,
-            Box::new(js::methods::Methods::default()) as Box<dyn Rule>,
-            Box::new(js::duplicates::Duplicates::default()) as Box<dyn Rule>,
-        ];
-    }
-    rules_to_load
-        .iter()
-        .map(|rule| match rule.as_str() {
-            "js-minify" => Box::new(js::minify::Minify) as Box<dyn Rule>,
-            "js-method-calls" => Box::new(js::methods::Methods::default()) as Box<dyn Rule>,
-            "js-duplicates" => Box::new(js::duplicates::Duplicates::default()) as Box<dyn Rule>,
-            _ => panic!("Unknown rule: {}", rule),
-        })
-        .collect()
+    let rules = vec![
+        Box::new(js::minify::Minify) as Box<dyn Rule>,
+        Box::new(js::duplicates::Duplicates::default()) as Box<dyn Rule>,
+    ];
+    filter_rules(rules_to_load, rules)
 }
 
-/// load_java_rules loads the java rules based on the rules to load
-fn load_java_rules(rules_to_load: Vec<String>) -> Vec<Box<dyn Rule>> {
+fn filter_rules(rules_to_load: Vec<String>, rules: Vec<Box<dyn Rule>>) -> Vec<Box<dyn Rule>> {
     if rules_to_load.is_empty() {
-        return vec![];
+        return rules;
     }
-    rules_to_load
-        .iter()
-        .map(|rule| match rule.as_str() {
-            "some-rule" => panic!("Not implemented yet"),
-            _ => panic!("Unknown rule: {}", rule),
-        })
+    rules
+        .into_iter()
+        .filter(|rule| rules_to_load.contains(&rule.get_name().to_lowercase()))
         .collect()
 }

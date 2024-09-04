@@ -31,6 +31,7 @@ let uniqueArray100 = array.filter(function(item, index, self) {} );
 let uniqueArray110 = array.filter(function() { });
 let uniqueArray230 = array.filter((item, index, self) => {return index == self.indexOf(self);});
 let uniqueArray150 = array.filter((item, index, self) => self.indexOf() === index);
+let startingIndex = 1;
 let uniqueArray250 = array.filter((item, index, self) => self.indexOf(item, startingIndex) === index);
 console.log(uniqueArray.length === 10);
 console.log(uniqueArray1.length === 10);
@@ -58,3 +59,12 @@ console.log(uniqueArray22.length === 10);
 console.log(uniqueArray23.length === 10);
 console.log(uniqueArray24.length === 10);
 console.log(uniqueArray150.length === 10);
+var n = 349734968729873;
+while (n > 1) {
+   if (n % 2 === 0) {
+       n = n / 2;
+   } else {
+       n = n * 3 + 1;
+   }
+}
+console.log(n);

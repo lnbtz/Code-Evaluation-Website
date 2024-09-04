@@ -69,6 +69,9 @@ pub async fn evaluation(form: Form<EvaluationInputForm>) -> impl IntoResponse {
 
 /// rules is the rules endpoint that returns the rules page
 pub async fn rules(Query(file_type): Query<RulesForFileType>) -> impl IntoResponse {
+    if file_type.file_type.is_empty() {
+        return HtmlTemplate(ShowRulesTemplate { checkboxes: vec![] });
+    }
     let rules = load_rules(file_type.file_type, vec![]);
     let checkboxes = build_checkboxes_data(rules);
     let template = ShowRulesTemplate { checkboxes };

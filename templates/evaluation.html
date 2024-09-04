@@ -6,16 +6,14 @@
 <form id="eval-form">
     <textarea placeholder="your code goes here..." required type=text name="code"></textarea>
     <select required name="file_type" hx-get="/rules" hx-target="#rules">
+        <option value="">Select programming language</option>
         <option value="css">CSS</option>
-        <option value="js">JS</option>
+        <option value="js">JavaScript</option>
         <option value="html">HTML</option>
-        <option value="java">Java</option>
     </select>
     <legend>Rules</legend>
     <div id="rules">
         <fieldset>
-            <input type="checkbox" name="rule" value="css-minify" id="css-minify" checked><label for="css-minify">CSS-Minify</label>
-            <input type="checkbox" name="rule" value="css-dry" id="css-dry" checked><label for="css-dry">CSS-DRY</label>
         </fieldset>
     </div>
     <button hx-post="/eval" hx-trigger="click" hx-target="#suggestions">evaluate code</button>
