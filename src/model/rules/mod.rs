@@ -68,6 +68,7 @@ pub fn load_js_rules(rules_to_load: Vec<String>) -> Vec<Box<dyn Rule>> {
     let rules = vec![
         Box::new(js::minify::Minify) as Box<dyn Rule>,
         Box::new(js::duplicates::Duplicates::default()) as Box<dyn Rule>,
+        // Box::new(js::template_rule::TemplateRule) as Box<dyn Rule>,
     ];
     filter_rules(rules_to_load, rules)
 }
