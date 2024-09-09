@@ -6,6 +6,24 @@
         integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC" 
         crossorigin="anonymous">
         </script>
+        <script>
+            htmx.defineExtension('submitJsonForEvaluateCode', {
+                onEvent: function (name, evt) {
+                if (name === "htmx:configRequest") {
+                    evt.detail.headers['Content-Type'] = "application/json"
+                }
+                },
+                encodeParameters: function(xhr, parameters, elt) {
+                xhr.overrideMimeType('text/json') // override default mime type
+                const body = { // set your request body
+                    code: parameters.code,
+                    file_type: parameters.file_type,
+                    rule: Array.from(document.querySelectorAll('input[type=checkbox]:checked')).map(checkbox => checkbox.value)
+                }
+                return (JSON.stringify(body))
+                }
+            })    
+        </script>
         <link rel="stylesheet" href="/styles.css">
         </link>
         <title>

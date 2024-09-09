@@ -1,4 +1,5 @@
 use crate::model::rules::LineResult;
+use minifier::js::minify;
 
 use super::Rule;
 
@@ -12,7 +13,9 @@ impl Rule for Minify {
         "consider minifying the input to save javascript file size and thus bandwidth. click link to minify your javascript https://www.minifier.org/ or use a bundler like webpack"
     }
     fn apply(&self, input: &str) -> Option<std::vec::Vec<LineResult>> {
-        if input.lines().count() > 1 {
+        let minified = minify(input);
+        println!("minified: {}", minified);
+        if minified.to_string() != input.to_string() {
             Some(vec![LineResult {
                 severity: crate::model::rules::Severity::Info,
                 line: 1,

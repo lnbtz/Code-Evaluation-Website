@@ -4,7 +4,7 @@
 use crate::model::rules::*;
 
 /// parse_code parses the code and returns the linter result
-pub fn parse_code(code: &str, file_type: String, rules_to_apply: Vec<String>) -> Vec<LineResult> {
+pub fn evalute_code(code: &str, file_type: String, rules_to_apply: Vec<String>) -> Vec<LineResult> {
     let mut line_results: Vec<LineResult> = Vec::new();
     // load rules based on file_type and seleted rules
     let rules: Vec<Box<dyn Rule>> = load_rules(file_type, rules_to_apply);

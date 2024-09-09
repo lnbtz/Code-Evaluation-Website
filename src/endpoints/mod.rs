@@ -1,12 +1,11 @@
-use crate::model::linter::parse_code;
-use crate::model::rules::{load_rules, LineResult, Rule};
+use crate::model::linter::evalute_code;
+use crate::model::rules::{load_css_rules, load_html_rules, load_js_rules, LineResult, Rule};
 #[allow(unused_imports)]
 use askama::{Html, Template};
 use askama_axum::Response;
-use axum::extract::Query;
+use axum::extract;
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
-use axum_extra::extract::Form;
 
 // region: templates
 /// EvaluationTemplate is a struct that holds the data for the evaluation template
@@ -40,12 +39,12 @@ pub async fn home() -> impl IntoResponse {
 }
 
 /// evaluation is the evaluation endpoint that returns the evaluation page
-pub async fn evaluation(form: Form<EvaluationInputForm>) -> impl IntoResponse {
-    let code = form.code.clone();
-    let file_type = form.file_type.clone();
-    let rules_to_apply = form.rules.clone();
-    let linter_result = parse_code(&code, file_type, rules_to_apply);
-    let mirror_code = code
+pub async fn evaluation(
+    extract::Json(payload): extract::Json<EvaluationInputForm>,
+) -> impl IntoResponse {
+    let linter_result = evalute_code(&payload.code, payload.file_type, payload.rules);
+    let mirror_code = payload
+        .code
         .lines()
         .enumerate()
         .map(|(line_nr, line)| {
@@ -67,12 +66,25 @@ pub async fn evaluation(form: Form<EvaluationInputForm>) -> impl IntoResponse {
     HtmlTemplate(template)
 }
 
-/// rules is the rules endpoint that returns the rules page
-pub async fn rules(Query(file_type): Query<RulesForFileType>) -> impl IntoResponse {
-    if file_type.file_type.is_empty() {
-        return HtmlTemplate(ShowRulesTemplate { checkboxes: vec![] });
-    }
-    let rules = load_rules(file_type.file_type, vec![]);
+/// load all css rules
+pub async fn css_rules() -> impl IntoResponse {
+    let rules = load_css_rules(vec![]);
+    let checkboxes = build_checkboxes_data(rules);
+    let template = ShowRulesTemplate { checkboxes };
+    HtmlTemplate(template)
+}
+
+/// load all js rules
+pub async fn js_rules() -> impl IntoResponse {
+    let rules = load_js_rules(vec![]);
+    let checkboxes = build_checkboxes_data(rules);
+    let template = ShowRulesTemplate { checkboxes };
+    HtmlTemplate(template)
+}
+
+/// load all html rules
+pub async fn html_rules() -> impl IntoResponse {
+    let rules = load_html_rules(vec![]);
     let checkboxes = build_checkboxes_data(rules);
     let template = ShowRulesTemplate { checkboxes };
     HtmlTemplate(template)

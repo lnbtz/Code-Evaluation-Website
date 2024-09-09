@@ -34,7 +34,7 @@ impl Rule for Duplicates {
         "JS-Duplicates"
     }
     fn get_description(&self) -> &str {
-        "Wenn Sie hier statt der 'filter' Methode die '[...new Set()]' Methode verwenden können sie Rechenzeit (ca. Faktor 100) und Energie sparen (ca. Faktor 1000)"
+        "Wenn Sie hier statt der 'filter' Methode die '[...new Set()]' Methode verwenden würden, um Duplikate aus dem Array zu löschen, können sie Rechenzeit (ca. Faktor 100) und Energie sparen (ca. Faktor 1000)"
     }
     fn apply(&self, input: &str) -> Option<std::vec::Vec<LineResult>> {
         let mut result = vec![];

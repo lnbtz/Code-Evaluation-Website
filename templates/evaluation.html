@@ -5,18 +5,24 @@
 <h1>Code Evaluation</h1>
 <form id="eval-form">
     <textarea placeholder="your code goes here..." required type=text name="code"></textarea>
-    <select required name="file_type" hx-get="/rules" hx-target="#rules">
+    <select required name="file_type">
         <option value="">Select programming language</option>
-        <option value="css">CSS</option>
-        <option value="js">JavaScript</option>
-        <option value="html">HTML</option>
+        <option value="css" hx-get="/getCssRules" hx-target="#rules">CSS</option>
+        <option value="js" hx-get="/getJsRules" hx-target="#rules">JavaScript</option>
+        <option value="html" hx-get="/getHtmlRules" hx-target="#rules">HTML</option>
     </select>
     <legend>Rules</legend>
     <div id="rules">
         <fieldset>
         </fieldset>
     </div>
-    <button hx-post="/eval" hx-trigger="click" hx-target="#suggestions">evaluate code</button>
+    <button 
+    hx-post="/evaluateCode" 
+    hx-trigger="click" 
+    hx-target="#suggestions"
+    hx-ext="submitJsonForEvaluateCode"
+    >
+    evaluate code</button>
 </form>
 
 <div id="suggestions"></div>

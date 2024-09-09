@@ -5,7 +5,7 @@ use axum::{
     routing::{get, post},
     Router,
 };
-use endpoints::{evaluation, home, image, rules, styles};
+use endpoints::{css_rules, evaluation, home, html_rules, image, js_rules, styles};
 use tracing::info;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
@@ -24,8 +24,10 @@ async fn main() {
     // build app with routes
     let app = Router::new()
         .route("/", get(home))
-        .route("/eval", post(evaluation))
-        .route("/rules", get(rules))
+        .route("/evaluateCode", post(evaluation))
+        .route("/getCssRules", get(css_rules))
+        .route("/getJsRules", get(js_rules))
+        .route("/getHtmlRules", get(html_rules))
         .route("/styles.css", get(styles))
         .route("/image.png", get(image));
 
