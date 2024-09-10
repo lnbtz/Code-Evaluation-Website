@@ -40,9 +40,8 @@ impl Rule for Duplicates {
         let mut result = vec![];
         // boiler plate code to parse the input string
         let allocator = Allocator::default();
-        let source_text = input;
         let source_type = SourceType::from_path("javscript.js").unwrap();
-        let ret = Parser::new(&allocator, source_text, source_type).parse();
+        let ret = Parser::new(&allocator, input, source_type).parse();
         let program = ret.program;
         let mut duplicates: Duplicates = Duplicates::default();
         duplicates.visit_program(&program);

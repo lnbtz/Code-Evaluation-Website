@@ -14,7 +14,6 @@ impl Rule for Minify {
     }
     fn apply(&self, input: &str) -> Option<std::vec::Vec<LineResult>> {
         let minified = minify(input);
-        println!("minified: {}", minified);
         if minified.to_string() != input.to_string() {
             Some(vec![LineResult {
                 severity: crate::model::rules::Severity::Info,

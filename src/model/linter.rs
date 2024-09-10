@@ -8,7 +8,6 @@ pub fn evalute_code(code: &str, file_type: String, rules_to_apply: Vec<String>) 
     let mut line_results: Vec<LineResult> = Vec::new();
     // load rules based on file_type and seleted rules
     let rules: Vec<Box<dyn Rule>> = load_rules(file_type, rules_to_apply);
-
     // apply rules to the code and store the results
     for rule in rules {
         if let Some(result) = rule.apply(code) {

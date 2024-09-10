@@ -17,7 +17,6 @@ impl Rule for Minify {
         let minified = Minifier::default()
             .minify(input, Level::Three)
             .unwrap_or_default();
-        println!("minified: {}", minified);
         if minified != input.to_string() {
             Some(vec![LineResult {
                 severity: crate::model::rules::Severity::Info,

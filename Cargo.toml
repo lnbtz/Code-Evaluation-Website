@@ -20,3 +20,4 @@ oxc = {version = "0.27.0" , features = ["semantic"]}
 serde_json = "1.0.128"
 minifier = "0.3.1"
 css-minify = "0.5.2"
+lazy_static = "1.5.0"
