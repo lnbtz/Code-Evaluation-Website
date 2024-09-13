@@ -13,7 +13,7 @@ impl Rule for TemplateRule {
     fn get_description(&self) -> &str {
         "some template rule"
     }
-    fn apply(&self, input: &str) -> Option<std::vec::Vec<LineResult>> {
+    fn apply(&self, ctx: &Ctx<'_>) -> Option<std::vec::Vec<LineResult>> {
         // add your rule logic here
         None
     }

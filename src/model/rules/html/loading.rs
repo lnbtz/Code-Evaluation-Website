@@ -1,6 +1,7 @@
 use crate::model::rules::LineResult;
 use ::scraper::{Html, Selector};
 
+use crate::model::ctx::Ctx;
 use crate::model::rules::Severity;
 
 use super::Rule;
@@ -17,8 +18,8 @@ impl Rule for Loading {
         "consinder lazy-loading images and scripts to improve performance."
     }
 
-    fn apply(&self, input: &str) -> Option<Vec<LineResult>> {
-        Some(parse_lazy_loading(input))
+    fn apply(&self, ctx: &Ctx<'_>) -> Option<Vec<LineResult>> {
+        Some(parse_lazy_loading(ctx.input))
     }
 }
 

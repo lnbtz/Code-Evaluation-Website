@@ -131,11 +131,6 @@ pub struct EvaluationInputForm {
     rules: Vec<String>,
 }
 
-#[derive(serde::Deserialize)]
-pub struct RulesForFileType {
-    file_type: String,
-}
-
 struct RuleCheckbox {
     value: String,
     name: String,

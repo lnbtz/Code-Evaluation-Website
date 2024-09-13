@@ -1,3 +1,4 @@
+use crate::model::ctx::Ctx;
 use crate::model::rules::LineResult;
 use css_minify::optimizations::Level;
 use css_minify::optimizations::Minifier;
@@ -13,11 +14,11 @@ impl Rule for Minify {
     fn get_description(&self) -> &str {
         "consider minifying the input to save css file size and thus bandwidth. click link to minify your css https://www.minifier.org/ or use a bundler like webpack"
     }
-    fn apply(&self, input: &str) -> Option<std::vec::Vec<LineResult>> {
+    fn apply(&self, ctx: &Ctx<'_>) -> Option<std::vec::Vec<LineResult>> {
         let minified = Minifier::default()
-            .minify(input, Level::Three)
+            .minify(ctx.input, Level::Three)
             .unwrap_or_default();
-        if minified != input.to_string() {
+        if minified != ctx.input.to_string() {
             Some(vec![LineResult {
                 severity: crate::model::rules::Severity::Info,
                 line: 1,

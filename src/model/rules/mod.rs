@@ -3,6 +3,7 @@ use self::css::minify::Minify;
 pub mod css;
 pub mod html;
 pub mod js;
+use crate::model::ctx::Ctx;
 
 /// Rule trait that all rules must implement
 pub trait Rule {
@@ -11,7 +12,7 @@ pub trait Rule {
     /// get the description of the rule
     fn get_description(&self) -> &str;
     /// apply the rule to the input and return the results
-    fn apply(&self, input: &str) -> Option<Vec<LineResult>>;
+    fn apply(&self, ctx: &Ctx<'_>) -> Option<Vec<LineResult>>;
 }
 
 /// LineResult is a struct that holds the result of a rule applied to a line

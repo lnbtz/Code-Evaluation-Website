@@ -1,7 +1,5 @@
 use crate::model::rules::LineResult;
 
-use oxc::allocator::Allocator;
-
 use oxc::ast::ast::BindingPatternKind::BindingIdentifier;
 use oxc::ast::ast::Expression::ArrowFunctionExpression;
 use oxc::ast::ast::Expression::BinaryExpression;
@@ -9,16 +7,16 @@ use oxc::ast::ast::Expression::CallExpression;
 use oxc::ast::ast::Expression::FunctionExpression;
 use oxc::ast::ast::Expression::Identifier;
 
+use super::Rule;
+use crate::model::ctx::Ctx;
 use oxc::ast::ast::Statement::ExpressionStatement;
 use oxc::ast::ast::Statement::ReturnStatement;
 use oxc::ast::visit::walk::walk_call_expression;
 use oxc::ast::Visit;
-use oxc::parser::Parser;
-use oxc::span::{GetSpan, SourceType};
+
+use oxc::span::GetSpan;
 use oxc::syntax::operator::BinaryOperator::Equality;
 use oxc::syntax::operator::BinaryOperator::StrictEquality;
-
-use super::Rule;
 /// This rule is used to find filter method calls that remove duplicates from an array
 #[derive(Debug, Default)]
 pub struct Duplicates {
@@ -36,19 +34,14 @@ impl Rule for Duplicates {
     fn get_description(&self) -> &str {
         "Wenn Sie hier statt der 'filter' Methode die '[...new Set()]' Methode verwenden würden, um Duplikate aus dem Array zu löschen, können sie Rechenzeit (ca. Faktor 100) und Energie sparen (ca. Faktor 1000)"
     }
-    fn apply(&self, input: &str) -> Option<std::vec::Vec<LineResult>> {
+    fn apply(&self, ctx: &Ctx<'_>) -> Option<std::vec::Vec<LineResult>> {
         let mut result = vec![];
-        // boiler plate code to parse the input string
-        let allocator = Allocator::default();
-        let source_type = SourceType::from_path("javscript.js").unwrap();
-        let ret = Parser::new(&allocator, input, source_type).parse();
-        let program = ret.program;
         let mut duplicates: Duplicates = Duplicates::default();
-        duplicates.visit_program(&program);
+        duplicates.visit_program(ctx.program);
 
         // iterate over the matches and create LineResult objects
         for (_function_name, start, _end) in &duplicates.matches {
-            let (line, column) = Duplicates::line_column(input, *start);
+            let (line, column) = Duplicates::line_column(ctx.input, *start);
             let classification = self.get_name().to_string();
             let description = self.get_description().to_string();
             let line_result = LineResult {
