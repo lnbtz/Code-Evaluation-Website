@@ -2,6 +2,7 @@ use crate::model::rules::LineResult;
 use ::scraper::{Html, Selector};
 
 use crate::model::ctx::Ctx;
+use crate::model::ctx::HtmlCtx;
 use crate::model::rules::Severity;
 
 use super::Rule;
@@ -19,7 +20,12 @@ impl Rule for Loading {
     }
 
     fn apply(&self, ctx: &Ctx<'_>) -> Option<Vec<LineResult>> {
-        Some(parse_lazy_loading(ctx.input))
+        Some(parse_lazy_loading(
+            ctx.html_ctx
+                .as_ref()
+                .unwrap_or(&HtmlCtx { input: "" })
+                .input,
+        ))
     }
 }
 

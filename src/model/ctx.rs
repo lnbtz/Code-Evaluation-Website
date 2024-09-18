@@ -1,22 +1,19 @@
 use oxc::ast::ast::Program;
 pub struct Ctx<'a> {
+    pub java_script_ctx: &'a Option<JavaScriptCtx<'a>>,
+    pub css_ctx: &'a Option<CssCtx<'a>>,
+    pub html_ctx: &'a Option<HtmlCtx<'a>>,
+}
+
+pub struct JavaScriptCtx<'a> {
     pub input: &'a str,
     pub program: &'a Program<'a>,
 }
 
-impl<'a> Ctx<'a> {
-    pub fn new(input: &'a str, program: &'a Program<'a>) -> Self {
-        Self { input, program }
-    }
-}
-
-pub struct JavsScriptCtx<'a> {
+pub struct CssCtx<'a> {
     pub input: &'a str,
-    pub program: &'a Program<'a>,
 }
 
-impl<'a> JavsScriptCtx<'a> {
-    pub fn new(input: &'a str, program: &'a Program<'a>) -> Self {
-        Self { input, program }
-    }
+pub struct HtmlCtx<'a> {
+    pub input: &'a str,
 }
