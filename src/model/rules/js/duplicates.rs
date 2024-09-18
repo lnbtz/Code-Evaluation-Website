@@ -1,14 +1,11 @@
-use crate::model::ctx::JavaScriptCtx;
 use crate::model::rules::LineResult;
 
-use oxc::ast;
 use oxc::ast::ast::BindingPatternKind::BindingIdentifier;
 use oxc::ast::ast::Expression::ArrowFunctionExpression;
 use oxc::ast::ast::Expression::BinaryExpression;
 use oxc::ast::ast::Expression::CallExpression;
 use oxc::ast::ast::Expression::FunctionExpression;
 use oxc::ast::ast::Expression::Identifier;
-use oxc::ast::ast::Program;
 
 use super::Rule;
 use crate::model::ctx::Ctx;
@@ -38,27 +35,30 @@ impl Rule for Duplicates {
         "Wenn Sie hier statt der 'filter' Methode die '[...new Set()]' Methode verwenden würden, um Duplikate aus dem Array zu löschen, können sie Rechenzeit (ca. Faktor 100) und Energie sparen (ca. Faktor 1000)"
     }
     fn apply(&self, ctx: &Ctx<'_>) -> Option<std::vec::Vec<LineResult>> {
-        let js_ctx = ctx.java_script_ctx.as_ref().unwrap();
-        let ast = js_ctx.program;
-        let mut result = vec![];
-        let mut duplicates: Duplicates = Duplicates::default();
-        duplicates.visit_program(ast);
+        if let Ctx::JavaScriptCtx(js_ctx) = ctx {
+            let ast = js_ctx.program;
+            let mut result = vec![];
+            let mut duplicates: Duplicates = Duplicates::default();
+            duplicates.visit_program(ast);
 
-        // iterate over the matches and create LineResult objects
-        for (_function_name, start, _end) in &duplicates.matches {
-            let (line, column) = Duplicates::line_column(js_ctx.input, *start);
-            let classification = self.get_name().to_string();
-            let description = self.get_description().to_string();
-            let line_result = LineResult {
-                severity: crate::model::rules::Severity::Warning,
-                line,
-                column,
-                classification,
-                description,
-            };
-            result.push(line_result);
+            // iterate over the matches and create LineResult objects
+            for (_function_name, start, _end) in &duplicates.matches {
+                let (line, column) = Duplicates::line_column(js_ctx.input, *start);
+                let classification = self.get_name().to_string();
+                let description = self.get_description().to_string();
+                let line_result = LineResult {
+                    severity: crate::model::rules::Severity::Warning,
+                    line,
+                    column,
+                    classification,
+                    description,
+                };
+                result.push(line_result);
+            }
+            Some(result)
+        } else {
+            None
         }
-        Some(result)
     }
 }
 

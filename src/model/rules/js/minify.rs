@@ -14,16 +14,19 @@ impl Rule for Minify {
         "consider minifying the input to save javascript file size and thus bandwidth. click link to minify your javascript https://www.minifier.org/ or use a bundler like webpack"
     }
     fn apply(&self, ctx: &Ctx<'_>) -> Option<std::vec::Vec<LineResult>> {
-        let input = ctx.java_script_ctx.as_ref().unwrap().input;
-        let minified = minify(input);
-        if minified.to_string() != input.to_string() {
-            Some(vec![LineResult {
-                severity: crate::model::rules::Severity::Info,
-                line: 1,
-                column: 0,
-                classification: self.get_name().to_string(),
-                description: self.get_description().to_string(),
-            }])
+        if let Ctx::JavaScriptCtx(js_ctx) = ctx {
+            let minified = minify(js_ctx.input);
+            if minified.to_string() != js_ctx.input.to_string() {
+                Some(vec![LineResult {
+                    severity: crate::model::rules::Severity::Info,
+                    line: 0,
+                    column: 0,
+                    classification: self.get_name().to_string(),
+                    description: self.get_description().to_string(),
+                }])
+            } else {
+                None
+            }
         } else {
             None
         }

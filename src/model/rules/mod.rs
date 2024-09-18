@@ -37,18 +37,6 @@ impl std::fmt::Display for Severity {
     }
 }
 
-/// load_rules loads the rules based on the file type and the rules to load
-/// if new programming langueages are added, they should be added here as a new match case
-/// with the corresponding load function
-pub fn load_rules(file_type: String, rules_to_load: Vec<String>) -> Vec<Box<dyn Rule>> {
-    match file_type.as_str() {
-        "css" => load_css_rules(rules_to_load),
-        "html" => load_html_rules(rules_to_load),
-        "js" => load_js_rules(rules_to_load),
-        _ => panic!("Unknown file type: {}", file_type),
-    }
-}
-
 /// load_css_rules loads the css rules based on the rules to load
 /// new rules have to be added to the match case
 pub fn load_css_rules(rules_to_load: Vec<String>) -> Vec<Box<dyn Rule>> {

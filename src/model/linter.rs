@@ -4,7 +4,7 @@
 use crate::model::ctx::*;
 use crate::model::rules::*;
 use oxc::allocator::Allocator;
-use oxc::ast::ast::Program;
+
 use oxc::parser::Parser;
 use oxc::span::SourceType;
 
@@ -30,35 +30,23 @@ fn handle_js(code: &str, rules_to_apply: Vec<String>) -> Vec<LineResult> {
     let source_type = SourceType::from_path("javscript.js").unwrap();
     let ret = Parser::new(&allocator, code, source_type).parse();
     let program = ret.program;
-    let ctx = Ctx {
-        java_script_ctx: &Some(JavaScriptCtx {
-            input: &code,
-            program: &program,
-        }),
-        css_ctx: &None,
-        html_ctx: &None,
-    };
+    let ctx = Ctx::JavaScriptCtx(JavaScriptCtx {
+        input: &code,
+        program: &program,
+    });
     let js_rules: Vec<Box<dyn Rule>> = load_js_rules(rules_to_apply);
     apply_rules(js_rules, &ctx)
 }
 
 fn handle_html(code: &str, rules_to_apply: Vec<String>) -> Vec<LineResult> {
-    let ctx = Ctx {
-        java_script_ctx: &None,
-        css_ctx: &None,
-        html_ctx: &Some(HtmlCtx { input: &code }),
-    };
+    let ctx = Ctx::HtmlCtx(HtmlCtx { input: &code });
 
     let html_rules: Vec<Box<dyn Rule>> = load_html_rules(rules_to_apply);
     apply_rules(html_rules, &ctx)
 }
 
 fn handle_css(code: &str, rules_to_apply: Vec<String>) -> Vec<LineResult> {
-    let ctx = Ctx {
-        java_script_ctx: &None,
-        css_ctx: &Some(CssCtx { input: &code }),
-        html_ctx: &None,
-    };
+    let ctx = Ctx::CssCtx(CssCtx { input: &code });
     let css_rules: Vec<Box<dyn Rule>> = load_css_rules(rules_to_apply);
     apply_rules(css_rules, &ctx)
 }

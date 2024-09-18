@@ -1,8 +1,8 @@
 use oxc::ast::ast::Program;
-pub struct Ctx<'a> {
-    pub java_script_ctx: &'a Option<JavaScriptCtx<'a>>,
-    pub css_ctx: &'a Option<CssCtx<'a>>,
-    pub html_ctx: &'a Option<HtmlCtx<'a>>,
+pub enum Ctx<'a> {
+    JavaScriptCtx(JavaScriptCtx<'a>),
+    CssCtx(CssCtx<'a>),
+    HtmlCtx(HtmlCtx<'a>),
 }
 
 pub struct JavaScriptCtx<'a> {
