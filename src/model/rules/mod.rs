@@ -38,25 +38,26 @@ impl std::fmt::Display for Severity {
 }
 
 /// load_css_rules loads the css rules based on the rules to load
-/// new rules have to be added to the match case
+/// new rules have to be added to the rules vector
 pub fn load_css_rules(rules_to_load: Vec<String>) -> Vec<Box<dyn Rule>> {
     let rules = vec![Box::new(Minify) as Box<dyn Rule>];
     filter_rules(rules_to_load, rules)
 }
 
 /// load_html_rules loads the html rules based on the rules to load
-/// new rules have to be added to the match case
+/// new rules have to be added to the rules vector
 pub fn load_html_rules(rules_to_load: Vec<String>) -> Vec<Box<dyn Rule>> {
     let rules = vec![Box::new(html::loading::Loading) as Box<dyn Rule>];
     filter_rules(rules_to_load, rules)
 }
 
 /// load_js_rules loads the js rules based on the rules to load
-/// new rules have to be added to the match case
+/// new rules have to be added to the rules vector
 pub fn load_js_rules(rules_to_load: Vec<String>) -> Vec<Box<dyn Rule>> {
     let rules = vec![
         Box::new(js::minify::Minify) as Box<dyn Rule>,
         Box::new(js::duplicates::Duplicates::default()) as Box<dyn Rule>,
+        // Add new rules here
         // Box::new(js::template_rule::TemplateRule) as Box<dyn Rule>,
     ];
     filter_rules(rules_to_load, rules)
