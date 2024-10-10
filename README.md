@@ -21,4 +21,4 @@ To run the code evaluation website locally, follow these steps:
 3. Select file format
 4. Mark checkboxes for rules that you want applied to your code
 5. Receive feedback and improve your code efficiency in terms of energy usage!
-6. You can use the text from the /testfiles/ folder as examples
+6. You can use the text from the /testfiles/ folder as examples :D
